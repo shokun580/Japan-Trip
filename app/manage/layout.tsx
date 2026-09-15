@@ -4,6 +4,10 @@ import { ManageTabs } from "@/components/manage-tabs";
 import { BottomNav } from "@/components/bottom-nav";
 import { getTrip } from "@/lib/data";
 
+// This layout reads the trip, so nothing under /manage may be prerendered at build
+// time — the build machine has no database to answer with.
+export const dynamic = "force-dynamic";
+
 export default async function ManageLayout({ children }: { children: React.ReactNode }) {
   const trip = await getTrip();
   return <main className="shell">

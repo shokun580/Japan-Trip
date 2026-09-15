@@ -5,3 +5,6 @@ node_modules
 *.log
 backups
 tsconfig.tsbuildinfo
+.vercel
+.env*
+!.env.example
