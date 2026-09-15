@@ -22,7 +22,7 @@ export function TripPlanner({ trip }: { trip: TripData }) {
     <AppHeader name={trip.name} dates={dates} />
     <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
     {day ? <>
-      <section className="day-control sticky top-2 z-20 mt-4 p-3 sm:p-4" aria-label="เลือกวัน">
+      <section className="day-control sticky z-20 mt-4 p-3 sm:p-4" aria-label="เลือกวัน">
         <div className="flex items-center gap-2">
           <button className="tap grid place-items-center rounded-xl border border-[var(--line)] bg-[var(--card)]/70 disabled:opacity-30" disabled={index === 0} onClick={() => setIndex(index - 1)} aria-label="วันก่อนหน้า"><ChevronLeft /></button>
           <label className="min-w-0 flex-1 text-center"><span className="sr-only">เลือกวันเดินทาง</span><select value={index} onChange={(e) => setIndex(Number(e.target.value))} className="tap w-full min-w-0 appearance-none rounded-xl bg-transparent px-1 text-center text-[1.05rem] font-semibold" aria-label="เลือกวันเดินทาง">{trip.days.map((d, i) => <option key={d.id} value={i}>{dayLabel(d.date)} • {d.title}</option>)}</select></label>
