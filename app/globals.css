@@ -54,7 +54,9 @@
 }
 * { box-sizing: border-box; }
 html { background: var(--paper); }
-body { margin: 0; color: var(--ink); background: radial-gradient(circle at 90% -5%, var(--snow) 0, transparent 26rem), var(--paper); font-family: "LINE Seed Sans TH", "Thonburi", "Leelawadee UI", system-ui, sans-serif; font-size: 17px; }
+/* Flat, not a gradient: the status bar is painted with themeColor, so any variation
+   in the page background would show as a seam beside the Dynamic Island. */
+body { margin: 0; color: var(--ink); background: var(--paper); font-family: "LINE Seed Sans TH", "Thonburi", "Leelawadee UI", system-ui, sans-serif; font-size: 17px; }
 button, input, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid var(--slate); outline-offset: 3px; }
