@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Trip {
+  id             String         @id @default(cuid())
+  name           String
+  startDate      DateTime       @db.Date
+  endDate        DateTime       @db.Date
+  takeoffDate    DateTime?      @db.Date
+  takeoffTime    String?        @db.VarChar(5)
+  landingTime    String?        @db.VarChar(5)
+  returnDate     DateTime?      @db.Date
+  returnTime     String?        @db.VarChar(5)
+  returnLandingTime String?     @db.VarChar(5)
+  accommodation Accommodation?
+  days           TripDay[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Accommodation {
+  id        String   @id @default(cuid())
+  tripId    String   @unique
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  name      String
+  mapUrl    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TripDay {
+  id        String     @id @default(cuid())
+  tripId    String
+  trip      Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  date      DateTime   @db.Date
+  title     String
+  sortOrder Int
+  activities Activity[]
+
+  @@unique([tripId, date])
+  @@index([tripId, sortOrder])
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  tripDayId   String
+  tripDay     TripDay  @relation(fields: [tripDayId], references: [id], onDelete: Cascade)
+  time        String   @db.VarChar(5)
+  name        String
+  description String?
+  mapUrl      String?
+  sortOrder   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tripDayId, sortOrder])
+}

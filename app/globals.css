@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_Rg.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_Bd.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_XBd.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_He.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
+:root {
+  /* The five palette colours — the only raw values in the project. */
+  --ink: #495867;
+  --slate: #577399;
+  --sky: #bdd5ea;
+  --snow: #f7f7ff;
+  --accent: #fe5f55;
+
+  /* Roles built from the five above. Components reference these, never raw hex,
+     so re-theming means editing this block alone. */
+  --muted: var(--slate);
+  --paper: var(--sky);
+  --card: var(--snow);
+  --line: rgb(87 115 153 / .28);
+  --line-strong: rgb(87 115 153 / .45);
+  --shade: rgb(73 88 103 / .16);
+  --on-dark: var(--snow);
+  --on-dark-soft: rgb(247 247 255 / .64);
+  --on-dark-faint: rgb(247 247 255 / .42);
+  --on-dark-line: rgb(247 247 255 / .18);
+  --accent-ring: rgb(254 95 85 / .26);
+  --accent-wash: rgb(254 95 85 / .12);
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body { margin: 0; color: var(--ink); background: radial-gradient(circle at 90% -5%, var(--snow) 0, transparent 26rem), var(--paper); font-family: "LINE Seed Sans TH", "Thonburi", "Leelawadee UI", system-ui, sans-serif; font-size: 17px; }
+button, input, textarea { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--slate); outline-offset: 3px; }
+.shell { width: min(100%, 900px); min-height: 100dvh; margin: auto; padding: 16px 16px 82px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 10px 30px var(--shade); }
+/* Opaque, not translucent: this bar stays pinned while the timeline scrolls under it. */
+.day-control { border: 1px solid var(--line); border-radius: 20px; background: var(--card); box-shadow: 0 10px 30px var(--shade); }
+.flight-card { overflow: hidden; position: relative; border-radius: 22px; padding: 16px; color: var(--on-dark); background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 18px 38px rgb(73 88 103 / .3); }
+.flight-card::after { content: ""; position: absolute; width: 130px; height: 130px; right: -45px; bottom: -80px; border: 22px solid rgb(247 247 255 / .07); border-radius: 999px; }
+.flight-icon { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border-radius: 12px; color: var(--ink); background: var(--sky); }
+.flight-card-title { flex: 0 0 auto; font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--on-dark-soft); }
+.flight-card-head { display: flex; width: 100%; min-height: 34px; align-items: center; justify-content: space-between; gap: 10px; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
+/* margin-left:auto and nowrap so the label and its arrow stay pinned right as one
+   unbreakable unit, even before the parent's flex rules apply. */
+.flight-card-toggle { display: inline-flex; flex: 0 0 auto; margin-left: auto; align-items: center; gap: 3px; font-size: .7rem; font-weight: 500; white-space: nowrap; color: var(--on-dark-soft); }
+.flight-leg-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.flight-leg-row + .flight-leg-row { padding-top: 12px; border-top: 1px solid var(--on-dark-line); }
+.flight-pill { flex: 0 0 auto; padding: 6px 12px; border-radius: 999px; background: var(--sky); color: var(--ink); font-size: .74rem; font-weight: 600; white-space: nowrap; }
+.flight-leg { border-radius: 22px; padding: 16px; color: var(--on-dark); background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 10px 26px rgb(73 88 103 / .24); }
+.slider { overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; overscroll-behavior-x: contain; }
+.slider::-webkit-scrollbar { display: none; }
+.slider > * { scroll-snap-align: center; }
+.tap { min-height: 48px; min-width: 48px; }
+.eyebrow { color: var(--ink); font-size: .78rem; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
+.field { width: 100%; border: 1px solid var(--line-strong); border-radius: 13px; background: var(--card); min-height: 48px; padding: 11px 13px; }
+/* Must come after .field: its padding shorthand otherwise overrides any utility padding-left. */
+.field-icon { padding-left: 42px; }
+.label { display: grid; gap: 5px; color: var(--ink); font-size: .94rem; font-weight: 500; }
+@media (min-width: 700px) { .shell { padding: 38px 30px 120px; } }
+@media (max-width: 430px) {
+  .card { border-radius: 18px; box-shadow: 0 7px 22px var(--shade); }
+  .mobile-edge { margin-right: -16px; margin-left: -16px; border-right: 0; border-left: 0; border-radius: 0; }
+  .flight-card { margin-right: -4px; margin-left: -4px; padding: 15px; border-radius: 20px; }
+  .flight-leg-row { flex-wrap: wrap; }
+  .flight-leg-row > .min-w-0 { flex-basis: calc(100% - 50px); }
+  .flight-pill { margin-left: 50px; }
+}
