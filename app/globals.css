@@ -96,6 +96,26 @@ button, a { -webkit-tap-highlight-color: transparent; }
 /* minmax(0,1fr) matters as much as min-width: an implicit "auto" column would size
    itself to the input's wide intrinsic width and push straight through the card. */
 .label { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 5px; color: var(--ink); font-size: .94rem; font-weight: 500; }
+/* Checklist ------------------------------------------------------------------ */
+/* A real button, not an <input>: iOS refuses to restyle a native checkbox past a
+   point, and the whole row is the tap target anyway. */
+.check { display: grid; flex: 0 0 auto; width: 28px; height: 28px; place-items: center; border: 2px solid var(--line-strong); border-radius: 9px; background: var(--card); color: transparent; transition: background .18s ease, border-color .18s ease, color .18s ease, transform .12s ease; }
+.check svg { transform: scale(.4); transition: transform .18s ease; }
+.check[data-checked="true"] { border-color: var(--accent); background: var(--accent); color: var(--snow); }
+.check[data-checked="true"] svg { transform: scale(1); }
+.check-row:active .check { transform: scale(.88); }
+.check-row[data-checked="true"] .check-label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line-strong); }
+.meter { display: block; overflow: hidden; height: 6px; border-radius: 999px; background: var(--line); }
+.meter > span { display: block; height: 100%; border-radius: 999px; background: var(--accent); transition: width .3s ease; }
+/* 0fr to 1fr animates the panel open without measuring anything; where a browser
+   will not interpolate it the rows simply snap, which is still correct. The name
+   avoids "collapse": Tailwind ships a utility by that name that would set
+   visibility:collapse and hide every row inside. */
+.reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s ease; }
+.reveal[data-open="true"] { grid-template-rows: 1fr; }
+.reveal > div { overflow: hidden; }
+.person-avatar { display: grid; border: 1px solid var(--line); width: 46px; height: 46px; flex: 0 0 auto; place-items: center; border-radius: 999px; background: var(--sky); color: var(--ink); }
+
 @media (min-width: 700px) { .shell { padding: calc(38px + env(safe-area-inset-top)) 30px 120px; } }
 /* No negative margins here on purpose: every card keeps the shell's own gutter so
    they all line up at the same edge instead of some poking past the others. */
@@ -105,4 +125,5 @@ button, a { -webkit-tap-highlight-color: transparent; }
   /* The countdown stays on the departure row, pinned right: the date truncates
      before the pill gives up any width, so the two read as one line. */
   .flight-pill { padding: 5px 10px; font-size: .7rem; }
+  .flight-date { font-size: .92rem; }
 }

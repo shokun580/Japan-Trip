@@ -8,20 +8,20 @@ datasource db {
 }
 
 model Trip {
-  id             String         @id @default(cuid())
-  name           String
-  startDate      DateTime       @db.Date
-  endDate        DateTime       @db.Date
-  takeoffDate    DateTime?      @db.Date
-  takeoffTime    String?        @db.VarChar(5)
-  landingTime    String?        @db.VarChar(5)
-  returnDate     DateTime?      @db.Date
-  returnTime     String?        @db.VarChar(5)
-  returnLandingTime String?     @db.VarChar(5)
-  accommodation Accommodation?
-  days           TripDay[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id                String         @id @default(cuid())
+  name              String
+  startDate         DateTime       @db.Date
+  endDate           DateTime       @db.Date
+  takeoffDate       DateTime?      @db.Date
+  takeoffTime       String?        @db.VarChar(5)
+  landingTime       String?        @db.VarChar(5)
+  returnDate        DateTime?      @db.Date
+  returnTime        String?        @db.VarChar(5)
+  returnLandingTime String?        @db.VarChar(5)
+  accommodation     Accommodation?
+  days              TripDay[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model Accommodation {
@@ -35,12 +35,12 @@ model Accommodation {
 }
 
 model TripDay {
-  id        String     @id @default(cuid())
-  tripId    String
-  trip      Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  date      DateTime   @db.Date
-  title     String
-  sortOrder Int
+  id         String     @id @default(cuid())
+  tripId     String
+  trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  date       DateTime   @db.Date
+  title      String
+  sortOrder  Int
   activities Activity[]
 
   @@unique([tripId, date])
@@ -60,4 +60,38 @@ model Activity {
   updatedAt   DateTime @updatedAt
 
   @@index([tripDayId, sortOrder])
+}
+
+// The packing checklist is per person, and "person" is just a key from lib/people —
+// the trip has no accounts, so the phone remembers who it belongs to and the rows
+// are keyed by that name. PackingProfile records that someone's starter list has
+// already been copied in, so emptying the list never makes it grow back.
+model PackingProfile {
+  person    String   @id
+  createdAt DateTime @default(now())
+}
+
+model PackingCategory {
+  id        String        @id @default(cuid())
+  person    String
+  name      String
+  sortOrder Int
+  items     PackingItem[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([person, sortOrder])
+}
+
+model PackingItem {
+  id         String          @id @default(cuid())
+  categoryId String
+  category   PackingCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name       String
+  checked    Boolean         @default(false)
+  sortOrder  Int
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([categoryId, sortOrder])
 }

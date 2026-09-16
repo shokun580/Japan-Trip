@@ -46,7 +46,7 @@ export function FlightCard({ outbound, inbound }: { outbound: FlightData; inboun
       <span className="flight-icon"><leg.Icon size={21}/></span>
       <div className="min-w-0 flex-1">
         <p className="text-[.72rem] tracking-[.14em] text-[var(--on-dark-soft)] uppercase">{leg.label}</p>
-        <p className="mt-0.5 truncate text-[1.02rem] font-semibold">{shortThaiDate(leg.date)} · {leg.time} น.</p>
+        <p className="flight-date mt-0.5 truncate text-[1.02rem] font-semibold">{shortThaiDate(leg.date)} · {leg.time} น.</p>
       </div>
       {leg === next
         ? <span className="flight-pill">{countdownLabel(leg.at, now)}</span>

@@ -5,6 +5,7 @@ import type { TripData } from "@/lib/types";
 import { dayLabel, shortThaiDate } from "@/lib/format";
 import { AppHeader } from "./app-header"; import { BottomNav } from "./bottom-nav"; import { Timeline } from "./timeline";
 import { FlightCard } from "./flight-card";
+import { ChecklistButton } from "./checklist-button";
 import { dayEntries } from "@/lib/timeline";
 import { todayTokyo } from "@/lib/use-tokyo-now";
 
@@ -21,6 +22,7 @@ export function TripPlanner({ trip }: { trip: TripData }) {
   return <main className="shell">
     <AppHeader name={trip.name} dates={dates} />
     <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
+    <ChecklistButton />
     {day ? <>
       <section className="day-control sticky z-20 mt-4 p-3 sm:p-4" aria-label="เลือกวัน">
         <div className="flex items-center gap-2">
