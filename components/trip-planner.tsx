@@ -24,8 +24,8 @@ export function TripPlanner({ trip }: { trip: TripData }) {
     {day ? <>
       <section className="day-control sticky z-20 mt-4 p-3 sm:p-4" aria-label="เลือกวัน">
         <div className="flex items-center gap-2">
-          <button className="tap grid place-items-center rounded-xl border border-[var(--line)] bg-[var(--card)]/70 disabled:opacity-30" disabled={index === 0} onClick={() => setIndex(index - 1)} aria-label="วันก่อนหน้า"><ChevronLeft /></button>
-          <label className="min-w-0 flex-1 text-center"><span className="sr-only">เลือกวันเดินทาง</span><select value={index} onChange={(e) => setIndex(Number(e.target.value))} className="tap w-full min-w-0 appearance-none rounded-xl bg-transparent px-1 text-center text-[1.05rem] font-semibold" aria-label="เลือกวันเดินทาง">{trip.days.map((d, i) => <option key={d.id} value={i}>{dayLabel(d.date)} • {d.title}</option>)}</select></label>
+          <button className="tap grid place-items-center rounded-xl border border-[var(--line)] disabled:opacity-30" disabled={index === 0} onClick={() => setIndex(index - 1)} aria-label="วันก่อนหน้า"><ChevronLeft /></button>
+          <p className="min-w-0 flex-1 truncate px-1 text-center text-[1.05rem] font-semibold">{dayLabel(day.date)} • {day.title}</p>
           <button className="tap grid place-items-center rounded-xl border border-[var(--line)] disabled:opacity-30" disabled={index === trip.days.length - 1} onClick={() => setIndex(index + 1)} aria-label="วันถัดไป"><ChevronRight /></button>
         </div>
         <div className="mt-2 flex items-center justify-center gap-1.5" aria-label={`วันที่ ${index + 1} จาก ${trip.days.length}`}>{trip.days.map((d, i) => <button key={d.id} onClick={() => setIndex(i)} aria-label={`ไปวันที่ ${i + 1} ${dayLabel(d.date)}`} className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-[var(--accent)]" : "w-2 bg-[var(--line-strong)]"}`}/>)}</div>
