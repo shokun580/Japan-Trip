@@ -102,7 +102,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 430px) {
   .card { border-radius: 18px; box-shadow: 0 7px 22px var(--shade); }
   .flight-card { padding: 15px; border-radius: 20px; }
-  .flight-leg-row { flex-wrap: wrap; }
-  .flight-leg-row > .min-w-0 { flex-basis: calc(100% - 50px); }
-  .flight-pill { margin-left: 50px; }
+  /* The countdown stays on the departure row, pinned right: the date truncates
+     before the pill gives up any width, so the two read as one line. */
+  .flight-pill { padding: 5px 10px; font-size: .7rem; }
 }
