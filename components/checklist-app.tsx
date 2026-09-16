@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { Check, ChevronDown, ChevronLeft, ChevronsDownUp, ChevronsUpDown, MoreVertical, Plus, User, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronsDownUp, ChevronsUpDown, MoreVertical, Plus, X } from "lucide-react";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { people, personName } from "@/lib/people";
+import { people, personName, personOf } from "@/lib/people";
 import { alertError, chooseAction, confirmAction, promptText, rowAction } from "@/lib/alerts";
 import type { PackingCategoryData, PackingItemData } from "@/lib/types";
 import { currentPerson, hydrated, noPerson, notHydrated, readOpenCategories, rememberPerson, subscribeNothing, subscribePerson, writeOpenCategories } from "@/lib/checklist-store";
@@ -148,14 +148,22 @@ export function ChecklistApp() {
 
   if (!person) return <main className="shell">
     <PageHeader />
-    <h1 className="mt-5 text-[1.7rem] leading-tight font-bold tracking-tight">นี่คือใคร?</h1>
-    <p className="mt-1.5 text-[.95rem] text-[var(--muted)]">เลือกชื่อของคุณ แล้วเครื่องนี้จะจำไว้ให้ ของแต่ละคนแยกกันคนละลิสต์</p>
-    <div className="mt-5 grid grid-cols-2 gap-3">
-      {people.map((p) => <button key={p.key} onClick={() => rememberPerson(p.key)} className="card tap flex items-center gap-3 px-3 text-left transition-transform active:scale-[.97]">
-        <span className="person-avatar"><User size={22} /></span>
-        <span className="min-w-0 truncate font-semibold">{p.name}</span>
+    <div className="mt-8 text-center sm:mt-12">
+      <p className="eyebrow">Packing checklist</p>
+      <h1 className="mt-2 text-[clamp(1.9rem,8vw,2.6rem)] leading-tight font-bold tracking-tight">นี่คือใคร?</h1>
+      <p className="mx-auto mt-2 max-w-xs text-[.95rem] text-[var(--muted)]">แตะชื่อของคุณ แล้วเครื่องนี้จะจำไว้ให้ ของแต่ละคนเก็บแยกกันคนละลิสต์</p>
+    </div>
+    <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:grid-cols-4">
+      {people.map((p, index) => <button
+        key={p.key}
+        onClick={() => rememberPerson(p.key)}
+        className={`person-tile ${index === people.length - 1 ? "col-span-2 sm:col-span-1" : ""}`}
+      >
+        <span className="person-badge" data-tone={p.tone} aria-hidden>{p.short}</span>
+        <span className="min-w-0 truncate text-[1.02rem] font-semibold">{p.name}</span>
       </button>)}
     </div>
+    <p className="mt-6 text-center text-[.82rem] text-[var(--muted)]">เปลี่ยนคนทีหลังได้ตลอดจากปุ่มมุมบนขวา</p>
   </main>;
 
   const total = categories ? countOf(categories) : null;
@@ -166,7 +174,7 @@ export function ChecklistApp() {
     <PageHeader onMenu={openMenu} />
 
     <div className="mt-5 flex items-center gap-3">
-      <span className="person-avatar"><User size={22} /></span>
+      <span className="person-badge person-badge-sm" data-tone={personOf(person)?.tone} aria-hidden>{personOf(person)?.short}</span>
       <div className="min-w-0 flex-1">
         <p className="eyebrow">เช็คลิสต์ของ</p>
         <h1 className="truncate text-[1.45rem] leading-tight font-bold tracking-tight">{personName(person)}</h1>

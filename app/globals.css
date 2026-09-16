@@ -114,7 +114,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .reveal { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s ease; }
 .reveal[data-open="true"] { grid-template-rows: 1fr; }
 .reveal > div { overflow: hidden; }
-.person-avatar { display: grid; border: 1px solid var(--line); width: 46px; height: 46px; flex: 0 0 auto; place-items: center; border-radius: 999px; background: var(--sky); color: var(--ink); }
+/* The picker reads as a row of people, not a stack of buttons: a weighted badge
+   carries each name, and the tile only has a border to hold them apart. */
+.person-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 11px; padding: 20px 10px; border: 1px solid var(--line); border-radius: 22px; background: var(--card); box-shadow: 0 10px 26px var(--shade); transition: transform .16s ease, box-shadow .16s ease; }
+.person-tile:active { transform: scale(.96); box-shadow: 0 4px 14px var(--shade); }
+.person-badge { display: grid; flex: 0 0 auto; place-items: center; width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 8px 18px rgb(73 88 103 / .32); color: var(--on-dark); font-size: 1.12rem; font-weight: 700; }
+.person-badge[data-tone="accent"] { background: linear-gradient(135deg, var(--accent), #e8524a); box-shadow: 0 8px 18px var(--accent-ring); }
+.person-badge[data-tone="sky"] { background: linear-gradient(135deg, var(--sky), #a9c6e0); box-shadow: 0 8px 18px rgb(87 115 153 / .24); color: var(--ink); }
+.person-badge-sm { width: 46px; height: 46px; box-shadow: 0 5px 12px rgb(73 88 103 / .26); font-size: .95rem; }
 
 @media (min-width: 700px) { .shell { padding: calc(38px + env(safe-area-inset-top)) 30px 120px; } }
 /* No negative margins here on purpose: every card keeps the shell's own gutter so
