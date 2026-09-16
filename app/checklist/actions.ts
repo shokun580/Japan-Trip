@@ -22,6 +22,10 @@ async function run(work: () => Promise<void>): Promise<ActionResult> {
 
 function message(error: unknown) {
   if (error instanceof z.ZodError) return error.issues[0]?.message ?? "ข้อมูลที่กรอกไม่ถูกต้อง";
+  // P2021/P2022 mean the checklist tables were never pushed to this database, which
+  // is the one failure a reader can actually fix — so it says how.
+  const code = typeof error === "object" && error !== null && "code" in error ? String((error as { code: unknown }).code) : "";
+  if (code === "P2021" || code === "P2022") return "ฐานข้อมูลยังไม่มีตารางของเช็คลิสต์ กรุณารัน npm run db:push";
   return error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่รู้จัก";
 }
 
