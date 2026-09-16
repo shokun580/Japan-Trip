@@ -57,7 +57,9 @@ html { background: var(--paper); }
 /* Flat, not a gradient: the status bar is painted with themeColor, so any variation
    in the page background would show as a seam beside the Dynamic Island. */
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: "LINE Seed Sans TH", "Thonburi", "Leelawadee UI", system-ui, sans-serif; font-size: 17px; }
-button, input, textarea { font: inherit; }
+button, input, textarea, select { font: inherit; }
+/* Last-resort guard so no control or image can ever be wider than what holds it. */
+input, textarea, select, img { max-width: 100%; }
 button, a { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid var(--slate); outline-offset: 3px; }
 .shell { width: min(100%, 900px); min-height: 100dvh; margin: auto; padding: calc(16px + env(safe-area-inset-top)) 16px 82px; }
@@ -81,15 +83,25 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .slider > * { scroll-snap-align: center; }
 .tap { min-height: 48px; min-width: 48px; }
 .eyebrow { color: var(--ink); font-size: .78rem; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
-.field { width: 100%; border: 1px solid var(--line-strong); border-radius: 13px; background: var(--card); min-height: 48px; padding: 11px 13px; }
+/* min-width:0 on both the label and the field is what keeps these inside their card.
+   Grid items default to min-width:auto, and iOS gives date/time inputs a wide
+   intrinsic size — wider still with the Buddhist calendar — so without this the
+   column refuses to shrink and the input spills past the card edge. */
+/* appearance:none is the part that matters on iOS: a natively styled date or time
+   input keeps a UA-enforced minimum size that ignores min-width, so it spills out
+   of its column no matter what the grid says. */
+.field { width: 100%; min-width: 0; max-width: 100%; appearance: none; -webkit-appearance: none; border: 1px solid var(--line-strong); border-radius: 13px; background: var(--card); min-height: 48px; padding: 11px 13px; }
 /* Must come after .field: its padding shorthand otherwise overrides any utility padding-left. */
 .field-icon { padding-left: 42px; }
-.label { display: grid; gap: 5px; color: var(--ink); font-size: .94rem; font-weight: 500; }
+/* minmax(0,1fr) matters as much as min-width: an implicit "auto" column would size
+   itself to the input's wide intrinsic width and push straight through the card. */
+.label { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 5px; color: var(--ink); font-size: .94rem; font-weight: 500; }
 @media (min-width: 700px) { .shell { padding: calc(38px + env(safe-area-inset-top)) 30px 120px; } }
+/* No negative margins here on purpose: every card keeps the shell's own gutter so
+   they all line up at the same edge instead of some poking past the others. */
 @media (max-width: 430px) {
   .card { border-radius: 18px; box-shadow: 0 7px 22px var(--shade); }
-  .mobile-edge { margin-right: -16px; margin-left: -16px; border-right: 0; border-left: 0; border-radius: 0; }
-  .flight-card { margin-right: -4px; margin-left: -4px; padding: 15px; border-radius: 20px; }
+  .flight-card { padding: 15px; border-radius: 20px; }
   .flight-leg-row { flex-wrap: wrap; }
   .flight-leg-row > .min-w-0 { flex-basis: calc(100% - 50px); }
   .flight-pill { margin-left: 50px; }

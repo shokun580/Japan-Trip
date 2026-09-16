@@ -39,7 +39,7 @@ export function Timeline({ date, entries }: { date: string; entries: TimelineEnt
     return () => observer.disconnect();
   }, [entries]);
 
-  if (!entries.length) return <div className="card mobile-edge mt-4 grid min-h-48 place-items-center px-6 text-center text-[var(--muted)]"><div><p className="text-4xl">🍵</p><p className="mt-3 font-medium">ยังไม่มีกิจกรรมสำหรับวันนี้</p><p className="mt-1 text-[.9rem]">พักสบาย ๆ หรือเพิ่มกิจกรรมในเมนูจัดการแผนเที่ยว</p></div></div>;
+  if (!entries.length) return <div className="card mt-4 grid min-h-48 place-items-center px-6 text-center text-[var(--muted)]"><div><p className="text-4xl">🍵</p><p className="mt-3 font-medium">ยังไม่มีกิจกรรมสำหรับวันนี้</p><p className="mt-1 text-[.9rem]">พักสบาย ๆ หรือเพิ่มกิจกรรมในเมนูจัดการแผนเที่ยว</p></div></div>;
 
   // Only the day being shown today gets a marker; otherwise there is no "now" on it.
   const markerTop = now && now.date === date ? indicatorTop(entries, now.minutes, centers) : null;
