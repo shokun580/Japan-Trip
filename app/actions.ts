@@ -51,15 +51,23 @@ export async function saveFlights(formData: FormData) {
   });
 }
 
+async function nextSortOrder(tripDayId: string) {
+  const aggregate = await db.activity.aggregate({ where: { tripDayId }, _max: { sortOrder: true } });
+  return (aggregate._max.sortOrder ?? -1) + 1;
+}
+
 export async function saveActivity(formData: FormData) {
   return run(async () => {
     const data = activitySchema.parse({ tripDayId: text(formData,"tripDayId"), activityId: text(formData,"activityId") || undefined, time: text(formData,"time"), name: text(formData,"name"), description: text(formData,"description"), mapUrl: text(formData,"mapUrl") });
     const value = { time: data.time, name: data.name, description: data.description || null, mapUrl: data.mapUrl || null };
-    if (data.activityId) await db.activity.update({ where: { id: data.activityId }, data: value });
-    else {
-      const aggregate = await db.activity.aggregate({ where: { tripDayId: data.tripDayId }, _max: { sortOrder: true } });
-      await db.activity.create({ data: { ...value, tripDayId: data.tripDayId, sortOrder: (aggregate._max.sortOrder ?? -1) + 1 } });
+    if (data.activityId) {
+      // A different tripDayId is a move to another day: it joins the end of that day's
+      // order, so it only breaks ties with activities already booked at the same time.
+      const current = await db.activity.findUniqueOrThrow({ where: { id: data.activityId }, select: { tripDayId: true } });
+      const move = current.tripDayId === data.tripDayId ? {} : { tripDayId: data.tripDayId, sortOrder: await nextSortOrder(data.tripDayId) };
+      await db.activity.update({ where: { id: data.activityId }, data: { ...value, ...move } });
     }
+    else await db.activity.create({ data: { ...value, tripDayId: data.tripDayId, sortOrder: await nextSortOrder(data.tripDayId) } });
   });
 }
 
