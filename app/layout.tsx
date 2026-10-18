@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { StartAtTop } from "@/components/start-at-top";
 
-export const metadata: Metadata = { title: "Japan Trip 2026", description: "แผนเที่ยวญี่ปุ่นสำหรับทุกคนในทริป" };
+// appleWebApp makes a home-screen copy open full screen on iOS, under the short name
+// that fits beneath the icon. The rest of the install comes from app/manifest.ts.
+export const metadata: Metadata = { title: "Japan Trip 2026", description: "แผนเที่ยวญี่ปุ่นสำหรับทุกคนในทริป", appleWebApp: { capable: true, title: "Japan Trip" } };
 // viewportFit "cover" lets the page background paint behind the status bar, so there is
 // no seam between it and the gradient. The safe-area insets in globals.css then keep
 // content clear of the Dynamic Island.

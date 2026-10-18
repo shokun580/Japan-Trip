@@ -15,7 +15,7 @@ async function ownerSignature(): Promise<string | null> {
   return btoa(String.fromCharCode(...mac)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-const sameText = (a: string, b: string) => a.length === b.length && [...a].reduce((diff, char, i) => diff | (char.charCodeAt(0) ^ b.charCodeAt(i)), 0) === 0;
+export const sameText = (a: string, b: string) => a.length === b.length && [...a].reduce((diff, char, i) => diff | (char.charCodeAt(0) ^ b.charCodeAt(i)), 0) === 0;
 
 export async function ownerCookieValue(): Promise<string | null> {
   const signature = await ownerSignature();

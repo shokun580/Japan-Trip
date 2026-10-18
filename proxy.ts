@@ -14,5 +14,6 @@ export async function proxy(request: NextRequest) {
 }
 
 // The picker itself, the build's own files, and what the browser fetches for the tab
-// and home-screen icon all have to load before anyone has picked a name.
-export const config = { matcher: ["/((?!login|_next/|fonts/|icon\\.svg|apple-icon\\.png|favicon\\.ico).*)"] };
+// and home-screen icon all have to load before anyone has picked a name. The widget
+// endpoint has no cookie to show — it checks its own token instead.
+export const config = { matcher: ["/((?!login|_next/|fonts/|icons/|icon\\.svg|apple-icon\\.png|favicon\\.ico|manifest\\.webmanifest|api/widget).*)"] };

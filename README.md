@@ -29,6 +29,16 @@ hand. Both values live in environment variables, never in this public repo:
 
 Set them in Vercel (Production) and in your local `.env`, then redeploy.
 
+## Home screen
+
+`app/manifest.ts` makes the site installable ("Add to Home Screen"). A home-screen
+copy on iOS keeps its own cookies, so each person picks their name once more inside it.
+
+The home-screen widget is a Scriptable script, `widgets/trip-widget.js`, that reads
+`/api/widget?person=<key>`. That endpoint skips the name picker and is locked by
+`WIDGET_TOKEN` instead (generate with `openssl rand -hex 32`, set it in Vercel next to
+the others). Setup steps for the phone, in Thai: `widgets/README.md`.
+
 ## Hotels
 
 The trip has one shared hotel (`/manage/stay`). Anyone with a row in `PersonStay`

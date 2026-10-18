@@ -35,6 +35,15 @@ export function durationLabel(minutes: number) {
   return rest ? `${hours} ชม. ${rest} นาที` : `${hours} ชม.`;
 }
 
+// Shared by the flight card and the home-screen widget, so both count down alike.
+export function countdownLabel(target: Date, now: Date) {
+  const ms = target.getTime() - now.getTime();
+  const hours = Math.floor(ms / 3_600_000), days = Math.floor(hours / 24);
+  if (days > 0) return `อีก ${days} วัน ${hours % 24} ชม.`;
+  if (hours > 0) return `อีก ${hours} ชม. ${Math.floor(ms / 60_000) % 60} นาที`;
+  return `อีก ${Math.max(1, Math.floor(ms / 60_000))} นาที`;
+}
+
 export function dayEntries(trip: TripData, day: DayData): TimelineEntry[] {
   const entries: TimelineEntry[] = day.activities.map((activity) => ({ kind: "activity", id: activity.id, time: activity.time, activity }));
   const flights: { direction: FlightDirection; label: string; data: TripData["outbound"] }[] = [
