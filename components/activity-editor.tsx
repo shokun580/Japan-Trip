@@ -13,7 +13,11 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
   // Every open starts on the day being viewed; picking another day is what moves it.
   const [dayId, setDayId] = useState(day.id);
   const [busy, setBusy] = useState(false);
-  const open = (target: ActivityData | "new") => { setEditing(target); setDayId(day.id); };
+  // Closing plays the sheet's exit before it unmounts; the length matches sheet-out
+  // in globals.css.
+  const [closing, setClosing] = useState(false);
+  const open = (target: ActivityData | "new") => { setEditing(target); setDayId(day.id); setClosing(false); };
+  const close = () => { setClosing(true); window.setTimeout(() => { setEditing(null); setClosing(false); }, 160); };
   const target = days.find((d) => d.id === dayId) ?? day;
   const moving = target.id !== day.id;
 
@@ -61,17 +65,17 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
       </li>;
     })}</ul>
 
-    {editing && <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--ink)]/55 p-4 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="activity-title">
-      <div className="max-h-[92dvh] w-full max-w-lg overflow-auto rounded-[28px] bg-[var(--card)] p-5 shadow-2xl sm:p-7">
+    {editing && <div className="overlay fixed inset-0 z-50 flex items-center justify-center bg-[var(--ink)]/55 p-4 sm:p-5" data-closing={closing} role="dialog" aria-modal="true" aria-labelledby="activity-title">
+      <div className="sheet max-h-[92dvh] w-full max-w-lg overflow-auto rounded-[28px] bg-[var(--card)] p-5 shadow-2xl sm:p-7">
         <div className="flex items-center justify-between">
           <h2 id="activity-title" className="text-2xl font-bold">{editing === "new" ? "เพิ่มกิจกรรม" : "แก้ไขกิจกรรม"}</h2>
-          <button onClick={() => setEditing(null)} className="tap grid place-items-center rounded-full" aria-label="ปิด"><X/></button>
+          <button onClick={close} className="tap grid place-items-center rounded-full" aria-label="ปิด"><X/></button>
         </div>
         <form action={async (formData) => {
           setBusy(true); const result = await saveActivity(formData); setBusy(false);
           const where = dayLabel(target.date);
           const success = editing === "new" ? (moving ? `เพิ่มกิจกรรมใน ${where} แล้ว` : "เพิ่มกิจกรรมแล้ว") : (moving ? `ย้ายไป ${where} แล้ว` : "บันทึกกิจกรรมแล้ว");
-          if (report(result, success)) setEditing(null);
+          if (report(result, success)) close();
         }} className="mt-5 grid gap-4">
           {editing !== "new" && <input type="hidden" name="activityId" value={editing.id}/>}
           {/* Radios styled as chips rather than a <select>: the native picker sits off-centre
@@ -91,7 +95,7 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
           <label className="label">รายละเอียด<textarea className="field min-h-28 resize-y" name="description" defaultValue={editing === "new" ? "" : editing.description ?? ""} maxLength={1000}/></label>
           <label className="label">ลิงก์แผนที่<input className="field" type="url" name="mapUrl" placeholder="https://maps.google.com/…" defaultValue={editing === "new" ? "" : editing.mapUrl ?? ""}/></label>
           <div className="mt-2 grid grid-cols-2 gap-3">
-            <button type="button" onClick={() => setEditing(null)} className="tap rounded-xl border border-[var(--line)] font-medium">ยกเลิก</button>
+            <button type="button" onClick={close} className="tap rounded-xl border border-[var(--line)] font-medium">ยกเลิก</button>
             <button disabled={busy} className="tap rounded-xl bg-[var(--ink)] font-medium text-[var(--on-dark)] disabled:opacity-40">{busy ? "กำลังบันทึก…" : editing !== "new" && moving ? `ย้ายไป ${dayLabel(target.date)}` : "บันทึก"}</button>
           </div>
         </form>

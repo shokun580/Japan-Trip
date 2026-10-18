@@ -15,30 +15,39 @@ export function TripPlanner({ trip, person, stay }: { trip: TripData; person: Pe
   // starts at the very top so the trip name and flights are the first thing seen.
   const today = trip.days.findIndex((d) => d.date === todayTokyo());
   const [index, setIndex] = useState(Math.max(0, today));
+  // Which way the last day change went, so the new day slides in from that side.
+  // null on first render: the page entrance already covers that.
+  const [direction, setDirection] = useState<"next" | "prev" | null>(null);
+  const goTo = (target: number) => { if (target === index) return; setDirection(target > index ? "next" : "prev"); setIndex(target); };
 
   const day = trip.days[index];
   const dates = `${shortThaiDate(trip.startDate)} – ${shortThaiDate(trip.endDate)}`;
   const entries = useMemo(() => (day ? dayEntries(trip, day) : []), [trip, day]);
 
   return <main className="shell">
+    {/* The bottom bar stays outside the animated wrapper: see .page-enter. */}
+    <div className="page-enter">
     <AppHeader name={trip.name} dates={dates} person={person} />
     <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
     <ChecklistButton person={person} />
     {day ? <>
       <section className="day-control sticky z-20 mt-4 p-3 sm:p-4" aria-label="เลือกวัน">
         <div className="flex items-center gap-2">
-          <button className="tap grid place-items-center rounded-xl border border-[var(--line)] disabled:opacity-30" disabled={index === 0} onClick={() => setIndex(index - 1)} aria-label="วันก่อนหน้า"><ChevronLeft /></button>
+          <button className="tap grid place-items-center rounded-xl border border-[var(--line)] disabled:opacity-30" disabled={index === 0} onClick={() => goTo(index - 1)} aria-label="วันก่อนหน้า"><ChevronLeft /></button>
           <p className="min-w-0 flex-1 truncate px-1 text-center text-[1.05rem] font-semibold">{dayLabel(day.date)} • {day.title}</p>
-          <button className="tap grid place-items-center rounded-xl border border-[var(--line)] disabled:opacity-30" disabled={index === trip.days.length - 1} onClick={() => setIndex(index + 1)} aria-label="วันถัดไป"><ChevronRight /></button>
+          <button className="tap grid place-items-center rounded-xl border border-[var(--line)] disabled:opacity-30" disabled={index === trip.days.length - 1} onClick={() => goTo(index + 1)} aria-label="วันถัดไป"><ChevronRight /></button>
         </div>
-        <div className="mt-2 flex items-center justify-center gap-1.5" aria-label={`วันที่ ${index + 1} จาก ${trip.days.length}`}>{trip.days.map((d, i) => <button key={d.id} onClick={() => setIndex(i)} aria-label={`ไปวันที่ ${i + 1} ${dayLabel(d.date)}`} className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-[var(--accent)]" : "w-2 bg-[var(--line-strong)]"}`}/>)}</div>
+        <div className="mt-2 flex items-center justify-center gap-1.5" aria-label={`วันที่ ${index + 1} จาก ${trip.days.length}`}>{trip.days.map((d, i) => <button key={d.id} onClick={() => goTo(i)} aria-label={`ไปวันที่ ${i + 1} ${dayLabel(d.date)}`} className={`h-2 rounded-full transition-all ${i === index ? "w-6 bg-[var(--accent)]" : "w-2 bg-[var(--line-strong)]"}`}/>)}</div>
       </section>
+      <div key={day.id} className="day-enter" data-dir={direction ?? undefined}>
       <div className="mt-5 flex items-end justify-between">
         <div><p className="eyebrow">Day {index + 1}</p><h2 className="mt-1 text-[1.45rem] font-bold tracking-tight">{day.title}</h2></div>
         <p className="rounded-full bg-[var(--card)] px-3 py-1.5 text-xs font-medium text-[var(--ink)]">{entries.length} กิจกรรม</p>
       </div>
       <Timeline date={day.date} entries={entries} />
+      </div>
     </> : <p>ยังไม่มีวันเดินทาง</p>}
+    </div>
     <BottomNav mapUrl={stay?.mapUrl ?? null} name={stay?.name} canManage={person === OWNER} />
   </main>;
 }
