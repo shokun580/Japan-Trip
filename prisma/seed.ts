@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const date = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
 
+const PEAK_MAP = "https://maps.app.goo.gl/Fkj3e4BBa2X2K4DV8";
 const NAMBA_MAP = "https://www.google.com/maps/place/Apartment+Hotel+11+Namba+Minami+2/@34.6552895,135.4940263,17z/data=!4m9!3m8!1s0x6000e7c77b826173:0xe59291cfc6a12e24!5m2!4m1!1i2!8m2!3d34.6552895!4d135.4966066!16s%2Fg%2F11ym0tpyx9?entry=ttu&g_ep=EgoyMDI2MDkwOS4wIKXMDSoASAFQAw%3D%3D";
 
 type Activity = { time: string; name: string; description?: string; mapUrl?: string };
@@ -27,8 +28,16 @@ const days: { date: string; title: string; activities?: Activity[] }[] = [
   { date: "2026-11-18", title: "เดินทางกลับ" },
 ];
 
+// Everyone else shares the trip's own accommodation.
+const personStays = [
+  { person: "dad-shokun", name: "The Peak Namba Minami Elite", mapUrl: PEAK_MAP },
+  { person: "jeewon", name: "The Peak Namba Minami Elite", mapUrl: PEAK_MAP },
+];
+
 async function main() {
   await prisma.trip.deleteMany();
+  await prisma.personStay.deleteMany();
+  await prisma.personStay.createMany({ data: personStays });
   await prisma.trip.create({
     data: {
       name: "เที่ยวญี่ปุ่น 2026",

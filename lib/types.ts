@@ -2,10 +2,12 @@ export type ActionResult = { ok: true } | { ok: false; message: string };
 export type ActivityData ={ id: string; time: string; name: string; description: string | null; mapUrl: string | null; sortOrder: number };
 export type DayData = { id: string; date: string; title: string; sortOrder: number; activities: ActivityData[] };
 export type FlightData = { date: string | null; takeoffTime: string | null; landingTime: string | null };
+export type StayData = { name: string; mapUrl: string | null };
+export type PersonStayData = StayData & { person: string };
 export type TripData = {
   id: string; name: string; startDate: string; endDate: string;
   outbound: FlightData; inbound: FlightData;
-  accommodation: { name: string; mapUrl: string | null } | null;
+  accommodation: StayData | null;
   days: DayData[];
 };
 export type PackingItemData = { id: string; name: string; checked: boolean };

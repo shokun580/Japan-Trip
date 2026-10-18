@@ -34,6 +34,17 @@ model Accommodation {
   updatedAt DateTime @updatedAt
 }
 
+// A few travellers sleep somewhere other than the shared hotel. Their row replaces
+// the trip's Accommodation for them alone; everyone without one uses the shared one.
+// `person` is a key from lib/people, like the checklist rows.
+model PersonStay {
+  person    String   @id
+  name      String
+  mapUrl    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model TripDay {
   id         String     @id @default(cuid())
   tripId     String
@@ -63,8 +74,8 @@ model Activity {
 }
 
 // The packing checklist is per person, and "person" is just a key from lib/people —
-// the trip has no accounts, so the phone remembers who it belongs to and the rows
-// are keyed by that name. PackingProfile records that someone's starter list has
+// the trip has no accounts, only the name picked on the way in, and the rows are
+// keyed by that name. PackingProfile records that someone's starter list has
 // already been copied in, so emptying the list never makes it grow back.
 model PackingProfile {
   person    String   @id

@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { isPerson } from "@/lib/people";
 import type { ActionResult } from "@/lib/types";
 
 const optionalUrl = z.union([z.literal(""), z.url({ protocol: /^https?$/ })]);
@@ -38,6 +39,21 @@ export async function saveAccommodation(formData: FormData) {
     const value = { name: data.name, mapUrl: data.mapUrl || null };
     await db.trip.update({ where: { id: data.id }, data: { accommodation: { upsert: { create: value, update: value } } } });
   });
+}
+
+const personKey = z.string().refine(isPerson);
+
+export async function savePersonStay(formData: FormData) {
+  return run(async () => {
+    const data = z.object({ person: personKey, name: z.string().trim().min(1).max(160), mapUrl: optionalUrl }).parse({ person: text(formData,"person"), name: text(formData,"name"), mapUrl: text(formData,"mapUrl") });
+    const value = { name: data.name, mapUrl: data.mapUrl || null };
+    await db.personStay.upsert({ where: { person: data.person }, create: { person: data.person, ...value }, update: value });
+  });
+}
+
+// Removing the row is all it takes to send that person back to the shared hotel.
+export async function deletePersonStay(person: string) {
+  return run(async () => { await db.personStay.delete({ where: { person: personKey.parse(person) } }); });
 }
 
 export async function saveFlights(formData: FormData) {

@@ -12,12 +12,23 @@ Mobile-first itinerary companion built with Next.js App Router, TypeScript, Tail
 
 Without `DATABASE_URL`, the app runs with read-only demo data so the UI can be previewed safely.
 
+## Who is using the app
+
+Opening any page first asks who you are (`/login`). Picking a name from
+`lib/people.ts` sets a cookie for a year; `proxy.ts` sends anyone without it back to
+the picker. There is no password — it only tells each page whose checklist and hotel
+to show. Switch person from the top-right menu.
+
+## Hotels
+
+The trip has one shared hotel (`/manage/stay`). Anyone with a row in `PersonStay`
+sees their own hotel instead, editable on the same page.
+
 ## Packing checklist
 
-Each of the seven travellers in `lib/people.ts` gets their own checklist, stored in
-the database. There is no login: the phone remembers who it belongs to in
-localStorage, and the first visit copies the starter list from
-`lib/packing-defaults.ts` into that person's own rows.
+Each traveller in `lib/people.ts` gets their own checklist, stored in the database.
+The first visit copies the starter list from `lib/packing-defaults.ts` into that
+person's own rows.
 
 Adding models means the schema changed, so run `npm run db:push` against the
 production database after deploying, or the checklist page will report that its

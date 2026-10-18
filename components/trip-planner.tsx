@@ -1,7 +1,8 @@
 "use client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { TripData } from "@/lib/types";
+import type { StayData, TripData } from "@/lib/types";
+import type { PersonKey } from "@/lib/people";
 import { dayLabel, shortThaiDate } from "@/lib/format";
 import { AppHeader } from "./app-header"; import { BottomNav } from "./bottom-nav"; import { Timeline } from "./timeline";
 import { FlightCard } from "./flight-card";
@@ -9,7 +10,7 @@ import { ChecklistButton } from "./checklist-button";
 import { dayEntries } from "@/lib/timeline";
 import { todayTokyo } from "@/lib/use-tokyo-now";
 
-export function TripPlanner({ trip }: { trip: TripData }) {
+export function TripPlanner({ trip, person, stay }: { trip: TripData; person: PersonKey; stay: StayData | null }) {
   // Today's date only picks which day the timeline opens on. The page itself always
   // starts at the very top so the trip name and flights are the first thing seen.
   const today = trip.days.findIndex((d) => d.date === todayTokyo());
@@ -20,9 +21,9 @@ export function TripPlanner({ trip }: { trip: TripData }) {
   const entries = useMemo(() => (day ? dayEntries(trip, day) : []), [trip, day]);
 
   return <main className="shell">
-    <AppHeader name={trip.name} dates={dates} />
+    <AppHeader name={trip.name} dates={dates} person={person} />
     <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
-    <ChecklistButton />
+    <ChecklistButton person={person} />
     {day ? <>
       <section className="day-control sticky z-20 mt-4 p-3 sm:p-4" aria-label="เลือกวัน">
         <div className="flex items-center gap-2">
@@ -38,6 +39,6 @@ export function TripPlanner({ trip }: { trip: TripData }) {
       </div>
       <Timeline date={day.date} entries={entries} />
     </> : <p>ยังไม่มีวันเดินทาง</p>}
-    <BottomNav mapUrl={trip.accommodation?.mapUrl ?? null} name={trip.accommodation?.name} />
+    <BottomNav mapUrl={stay?.mapUrl ?? null} name={stay?.name} />
   </main>;
 }

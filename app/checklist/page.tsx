@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { signedInPerson } from "@/lib/session";
 import { ChecklistApp } from "@/components/checklist-app";
 
 export const metadata: Metadata = { title: "เช็คลิสต์ของใช้" };
 
-// Everything here depends on which person the phone remembers, so the page itself
-// holds no data — the client asks for that person's list once it has read it.
-export default function ChecklistPage() { return <ChecklistApp />; }
+// The list itself is fetched by the client, which patches it optimistically — the
+// page only says whose list to open.
+export default async function ChecklistPage() { return <ChecklistApp person={await signedInPerson()} />; }

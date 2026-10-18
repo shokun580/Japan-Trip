@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { Check, ChevronDown, ChevronLeft, ChevronsDownUp, ChevronsUpDown, MoreVertical, Plus, X } from "lucide-react";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { people, personName, personOf } from "@/lib/people";
+import { useCallback, useEffect, useState } from "react";
+import { personName, personOf, type PersonKey } from "@/lib/people";
 import { alertError, chooseAction, confirmAction, promptText, rowAction } from "@/lib/alerts";
 import type { PackingCategoryData, PackingItemData } from "@/lib/types";
-import { currentPerson, hydrated, noPerson, notHydrated, readOpenCategories, rememberPerson, subscribeNothing, subscribePerson, writeOpenCategories } from "@/lib/checklist-store";
+import { readOpenCategories, writeOpenCategories } from "@/lib/checklist-store";
 import { addCategory, addItem, clearChecks, loadChecklist, removeCategory, removeItem, renameCategory, renameItem, resetChecklist, setItemChecked } from "@/app/checklist/actions";
 
 const countOf = (categories: PackingCategoryData[]) => {
@@ -13,12 +13,7 @@ const countOf = (categories: PackingCategoryData[]) => {
   return { done: items.filter((i) => i.checked).length, total: items.length };
 };
 
-export function ChecklistApp() {
-  // Who this phone belongs to is external state, so it is read through a store
-  // rather than copied into an effect — and `ready` is how the component knows
-  // hydration is done and the picker is safe to show.
-  const person = useSyncExternalStore(subscribePerson, currentPerson, noPerson);
-  const ready = useSyncExternalStore(subscribeNothing, hydrated, notHydrated);
+export function ChecklistApp({ person }: { person: PersonKey }) {
   // Keyed by person so switching shows the loader instead of the previous list.
   const [loaded, setLoaded] = useState<{ person: string; categories: PackingCategoryData[]; saved: boolean } | null>(null);
   const [failure, setFailure] = useState<{ person: string; message: string } | null>(null);
@@ -33,7 +28,6 @@ export function ChecklistApp() {
   // retry button bumps to run it again.
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    if (!person) return;
     let current = true;
     loadChecklist(person)
       .then((result) => {
@@ -52,14 +46,14 @@ export function ChecklistApp() {
   function toggleOpen(id: string) {
     setOpen((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
-      if (person) writeOpenCategories(person, next);
+      writeOpenCategories(person, next);
       return next;
     });
   }
 
   function setAllOpen(ids: string[]) {
     setOpen(ids);
-    if (person) writeOpenCategories(person, ids);
+    writeOpenCategories(person, ids);
   }
 
   // Every edit lands in state first and is rolled back if the server says no, so a
@@ -103,7 +97,6 @@ export function ChecklistApp() {
   }
 
   async function createCategory() {
-    if (!person) return;
     const name = await promptText("หมวดหมู่ใหม่", "", "เช่น ของฝาก");
     if (!name) return;
     const temporary = `tmp-${Date.now()}`;
@@ -130,7 +123,6 @@ export function ChecklistApp() {
   // Both of these throw work away, so they stay behind the header menu rather than
   // sitting on screen where a thumb can find them by accident.
   async function openMenu() {
-    if (!person) return;
     const choice = await chooseAction("จัดการเช็คลิสต์", "ล้างที่ติ๊กไว้", "คืนค่าเริ่มต้น", "ทั้งสองอย่างย้อนกลับไม่ได้");
     if (choice === "confirm") {
       if (!(await confirmAction("ล้างเครื่องหมายทั้งหมด?", "รายการของยังอยู่ครบ แค่กลับไปเป็นยังไม่ได้เตรียม", "ล้างเลย"))) return;
@@ -143,28 +135,6 @@ export function ChecklistApp() {
       setCategories(result.categories); setAllOpen([]);
     }
   }
-
-  if (!ready) return <main className="shell"><p className="mt-10 text-center text-[var(--muted)]">กำลังเปิดเช็คลิสต์…</p></main>;
-
-  if (!person) return <main className="shell">
-    <PageHeader />
-    <div className="mt-8 text-center sm:mt-12">
-      <p className="eyebrow">Packing checklist</p>
-      <h1 className="mt-2 text-[clamp(1.9rem,8vw,2.6rem)] leading-tight font-bold tracking-tight">นี่คือใคร?</h1>
-      <p className="mx-auto mt-2 max-w-xs text-[.95rem] text-[var(--muted)]">แตะชื่อของคุณ แล้วเครื่องนี้จะจำไว้ให้ ของแต่ละคนเก็บแยกกันคนละลิสต์</p>
-    </div>
-    <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:grid-cols-4">
-      {people.map((p, index) => <button
-        key={p.key}
-        onClick={() => rememberPerson(p.key)}
-        className={`person-tile ${index === people.length - 1 ? "col-span-2 sm:col-span-1" : ""}`}
-      >
-        <span className="person-badge" data-tone={p.tone} aria-hidden>{p.short}</span>
-        <span className="min-w-0 truncate text-[1.02rem] font-semibold">{p.name}</span>
-      </button>)}
-    </div>
-    <p className="mt-6 text-center text-[.82rem] text-[var(--muted)]">เปลี่ยนคนทีหลังได้ตลอดจากปุ่มมุมบนขวา</p>
-  </main>;
 
   const total = categories ? countOf(categories) : null;
   const saved = loaded?.person === person ? loaded.saved : true;
@@ -179,7 +149,7 @@ export function ChecklistApp() {
         <p className="eyebrow">เช็คลิสต์ของ</p>
         <h1 className="truncate text-[1.45rem] leading-tight font-bold tracking-tight">{personName(person)}</h1>
       </div>
-      <button onClick={() => rememberPerson(null)} className="tap shrink-0 rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 text-[.85rem] font-medium">เปลี่ยนคน</button>
+      <Link href="/login?next=/checklist" className="tap grid shrink-0 place-items-center rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 text-[.85rem] font-medium">เปลี่ยนคน</Link>
     </div>
 
     {!saved && <p className="mt-4 rounded-2xl border border-dashed border-[var(--line-strong)] p-3 text-[.85rem] text-[var(--muted)]">โหมดตัวอย่าง: ยังไม่ได้ต่อฐานข้อมูล สิ่งที่แก้จะไม่ถูกบันทึก</p>}
