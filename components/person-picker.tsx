@@ -1,34 +1,31 @@
 "use client";
 import { Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { OWNER, people, personName, type PersonKey } from "@/lib/people";
-import { promptPin } from "@/lib/alerts";
-import { signInOwner } from "@/app/login/actions";
+import { OWNER, people, type PersonKey } from "@/lib/people";
 
 // Each tile is a submit button carrying its own key, so picking works before the
 // page has hydrated. Once a tap is on its way every tile locks, and the one tapped
 // stays lit, because the round trip to set the cookie is the only wait here.
-// The owner's tile is the exception: it asks for the PIN first and never submits.
+// The owner's tile is the exception: it opens the PIN pad and never submits.
 export function PersonPicker({ current, next }: { current: PersonKey | null; next: string }) {
+  const router = useRouter();
   const { pending, data } = useFormStatus();
   const [entering, setEntering] = useState(false);
   const chosen = entering ? OWNER : pending ? data?.get("person") : null;
 
-  async function enterAsOwner() {
+  function enterAsOwner() {
     // Already holding a signed cookie: this is just going back, not a new sign-in.
-    if (current !== OWNER && !(await promptPin(`เข้าใช้งานเป็น${personName(OWNER)}`, signInOwner))) return;
-    setEntering(true);
-    // A full load rather than a client transition, so the proxy and every server
-    // component read the new cookie from the first request.
-    window.location.assign(next);
+    if (current === OWNER) { setEntering(true); window.location.assign(next); return; }
+    router.push(next === "/" ? "/login/pin" : `/login/pin?next=${encodeURIComponent(next)}`);
   }
 
   return <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:grid-cols-4">
     {people.map((p, index) => <button
       key={p.key}
       type={p.key === OWNER ? "button" : "submit"}
-      onClick={p.key === OWNER ? () => void enterAsOwner() : undefined}
+      onClick={p.key === OWNER ? enterAsOwner : undefined}
       name={p.key === OWNER ? undefined : "person"}
       value={p.key === OWNER ? undefined : p.key}
       disabled={pending || entering}

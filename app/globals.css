@@ -121,8 +121,25 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .person-tile[aria-current="true"] { border-color: var(--slate); }
 .person-tile:disabled { opacity: .5; transition: opacity .16s ease; }
 .person-tile[data-chosen="true"] { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-ring), 0 10px 26px var(--shade); }
-/* Wide-spaced digits so six dots read as six, centred like the keypad below them. */
-.swal2-input.pin-input { text-align: center; letter-spacing: .5em; font-size: 1.5rem; }
+/* PIN pad --------------------------------------------------------------------- */
+/* Fixed to the viewport so nothing scrolls and no sky-blue overscroll shows past
+   the dark screen; it only scrolls itself on a phone too short for the whole pad. */
+.pin-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; overflow-y: auto; padding: calc(40px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); background: var(--ink); color: var(--on-dark); }
+.pin-dots { display: flex; gap: 16px; margin: 40px 0 44px; }
+.pin-dot { width: 16px; height: 16px; border: 2px solid var(--on-dark-faint); border-radius: 999px; transition: background .15s ease, border-color .15s ease, transform .15s ease; }
+.pin-dot[data-filled="true"] { border-color: var(--on-dark); background: var(--on-dark); transform: scale(1.08); }
+.pin-dots[data-status="wrong"] { animation: pin-shake .4s ease; }
+.pin-dots[data-status="wrong"] .pin-dot[data-filled="true"] { border-color: var(--accent); background: var(--accent); }
+.pin-dots[data-status="done"] .pin-dot { border-color: var(--sky); background: var(--sky); }
+@keyframes pin-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+/* Key size follows the screen width so three columns fit a small phone with room
+   either side, and stops growing at a size a thumb still covers comfortably. */
+.pin-keys { --key: min(76px, 21vw); display: grid; grid-template-columns: repeat(3, var(--key)); gap: 18px min(28px, 6vw); }
+.pin-key { display: grid; place-items: center; width: var(--key); height: var(--key); border: 1px solid var(--on-dark-line); border-radius: 999px; background: transparent; color: var(--on-dark); font-size: 1.85rem; font-weight: 400; transition: background .12s ease, transform .12s ease; }
+.pin-key:active, .pin-key[data-pressed="true"] { background: var(--on-dark-line); transform: scale(.95); }
+.pin-key:disabled { opacity: .45; }
+.pin-status { display: flex; min-height: 24px; align-items: center; justify-content: center; gap: 7px; color: var(--on-dark-soft); font-size: .88rem; font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .pin-dots[data-status="wrong"] { animation: none; } }
 .person-badge { display: grid; flex: 0 0 auto; place-items: center; width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 8px 18px rgb(73 88 103 / .32); color: var(--on-dark); font-size: 1.12rem; font-weight: 700; }
 .person-badge[data-tone="accent"] { background: linear-gradient(135deg, var(--accent), #e8524a); box-shadow: 0 8px 18px var(--accent-ring); }
 .person-badge[data-tone="sky"] { background: linear-gradient(135deg, var(--sky), #a9c6e0); box-shadow: 0 8px 18px rgb(87 115 153 / .24); color: var(--ink); }
