@@ -62,3 +62,30 @@ export async function rowAction(title: string) {
   const choice = await chooseAction(title, "เปลี่ยนชื่อ", "ลบ");
   return choice === "confirm" ? "rename" as const : choice === "deny" ? "delete" as const : null;
 }
+
+// The check runs inside preConfirm so a wrong PIN keeps the dialog open with the
+// reason under the field, instead of closing and making the person start over.
+export async function promptPin(title: string, check: (pin: string) => Promise<{ ok: true } | { ok: false; message: string }>) {
+  const result = await Swal.fire({
+    ...base,
+    title,
+    text: "ใส่ PIN 6 หลัก",
+    input: "password",
+    inputAttributes: { inputmode: "numeric", pattern: "[0-9]*", maxlength: "6", autocomplete: "one-time-code", "aria-label": "PIN 6 หลัก" },
+    customClass: { input: "pin-input" },
+    showCancelButton: true,
+    confirmButtonText: "เข้าใช้งาน",
+    cancelButtonText: "ยกเลิก",
+    reverseButtons: true,
+    showLoaderOnConfirm: true,
+    inputValidator: (pin) => (/^\d{6}$/.test(pin) ? undefined : "PIN ต้องเป็นตัวเลข 6 หลัก"),
+    preConfirm: async (pin: string) => {
+      const outcome = await check(pin).catch(() => ({ ok: false as const, message: "เชื่อมต่อไม่สำเร็จ" }));
+      if (outcome.ok) return true;
+      Swal.showValidationMessage(outcome.message);
+      return false;
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
+  return result.isConfirmed;
+}

@@ -2,7 +2,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isPerson } from "@/lib/people";
+import { isPerson, personName, OWNER } from "@/lib/people";
+import { isOwner } from "@/lib/session";
 import type { ActionResult } from "@/lib/types";
 
 const optionalUrl = z.union([z.literal(""), z.url({ protocol: /^https?$/ })]);
@@ -16,8 +17,10 @@ function refresh() { revalidatePath("/", "layout"); }
 
 // Server action errors are sanitized in production, so every action reports failure
 // as a value instead — that is what the client alerts can actually display.
+// Every action here changes the trip itself, so each one is the owner's alone.
 async function run(work: () => Promise<void>): Promise<ActionResult> {
   if (!process.env.DATABASE_URL) return { ok: false, message: "กรุณาตั้งค่า DATABASE_URL ก่อนแก้ไขข้อมูล" };
+  if (!(await isOwner())) return { ok: false, message: `เฉพาะ${personName(OWNER)}เท่านั้นที่แก้ไขแผนเที่ยวได้` };
   try { await work(); refresh(); return { ok: true }; }
   catch (error) {
     if (error instanceof z.ZodError) return { ok: false, message: "ข้อมูลที่กรอกไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง" };

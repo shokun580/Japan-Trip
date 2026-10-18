@@ -16,8 +16,18 @@ Without `DATABASE_URL`, the app runs with read-only demo data so the UI can be p
 
 Opening any page first asks who you are (`/login`). Picking a name from
 `lib/people.ts` sets a cookie for a year; `proxy.ts` sends anyone without it back to
-the picker. There is no password — it only tells each page whose checklist and hotel
-to show. Switch person from the top-right menu.
+the picker. For most people there is no password — it only tells each page whose
+checklist and hotel to show. Switch person from the top-right menu.
+
+โชกุน (`OWNER` in `lib/people.ts`) is the only one who can change the trip: the
+`/manage` pages and every action in `app/actions.ts` refuse anyone else. Picking
+โชกุน asks for a 6-digit PIN, and their cookie is signed so it cannot be typed in by
+hand. Both values live in environment variables, never in this public repo:
+
+- `OWNER_PIN` — the PIN. Changing it signs out every phone that used the old one.
+- `SESSION_SECRET` — signs the cookie. Generate with `openssl rand -base64 32`.
+
+Set them in Vercel (Production) and in your local `.env`, then redeploy.
 
 ## Hotels
 

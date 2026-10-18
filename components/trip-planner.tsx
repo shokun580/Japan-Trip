@@ -2,7 +2,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { StayData, TripData } from "@/lib/types";
-import type { PersonKey } from "@/lib/people";
+import { OWNER, type PersonKey } from "@/lib/people";
 import { dayLabel, shortThaiDate } from "@/lib/format";
 import { AppHeader } from "./app-header"; import { BottomNav } from "./bottom-nav"; import { Timeline } from "./timeline";
 import { FlightCard } from "./flight-card";
@@ -39,6 +39,6 @@ export function TripPlanner({ trip, person, stay }: { trip: TripData; person: Pe
       </div>
       <Timeline date={day.date} entries={entries} />
     </> : <p>ยังไม่มีวันเดินทาง</p>}
-    <BottomNav mapUrl={stay?.mapUrl ?? null} name={stay?.name} />
+    <BottomNav mapUrl={stay?.mapUrl ?? null} name={stay?.name} canManage={person === OWNER} />
   </main>;
 }

@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isPerson, PERSON_COOKIE } from "@/lib/people";
+import { PERSON_COOKIE } from "@/lib/people";
+import { personFromCookie } from "@/lib/person-cookie";
 
-// Every page sits behind picking who you are. It is not a lock — there is no
-// password and anyone can pick any name — it only makes sure each page knows whose
-// hotel and checklist to show.
-export function proxy(request: NextRequest) {
-  if (isPerson(request.cookies.get(PERSON_COOKIE)?.value)) return NextResponse.next();
+// Every page sits behind picking who you are. For everyone but the owner it is not a
+// lock — anyone can pick any of those names — it only makes sure each page knows
+// whose hotel and checklist to show.
+export async function proxy(request: NextRequest) {
+  if (await personFromCookie(request.cookies.get(PERSON_COOKIE)?.value)) return NextResponse.next();
   const login = new URL("/login", request.url);
   const next = request.nextUrl.pathname + request.nextUrl.search;
   if (next !== "/") login.searchParams.set("next", next);

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
-import { isPerson, PERSON_COOKIE } from "@/lib/people";
-import { safeNext } from "@/lib/session";
+import { currentPerson, safeNext } from "@/lib/session";
 import { PersonPicker } from "@/components/person-picker";
 import { signIn } from "./actions";
 
@@ -11,8 +9,7 @@ export const metadata: Metadata = { title: "เลือกชื่อของ
 // marked, and leaving without tapping anyone keeps them.
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const next = safeNext((await searchParams).next);
-  const value = (await cookies()).get(PERSON_COOKIE)?.value;
-  const current = isPerson(value) ? value : null;
+  const current = await currentPerson();
 
   return <main className="shell">
     <div className="mt-8 text-center sm:mt-12">
@@ -22,7 +19,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     </div>
     <form action={signIn}>
       <input type="hidden" name="next" value={next} />
-      <PersonPicker current={current} />
+      <PersonPicker current={current} next={next} />
     </form>
     <p className="mt-6 text-center text-[.82rem] text-[var(--muted)]">เปลี่ยนคนทีหลังได้ตลอดจากเมนูมุมบนขวา</p>
   </main>;

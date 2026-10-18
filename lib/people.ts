@@ -23,6 +23,10 @@ export type PersonKey = (typeof people)[number]["key"];
 // Read by proxy.ts as well as the server, so it lives here rather than beside cookies().
 export const PERSON_COOKIE = "japan-trip.person";
 
+// The one person who may change the trip itself. Picking this name takes a PIN, and
+// their cookie is signed so it cannot simply be typed in — see lib/person-cookie.
+export const OWNER: PersonKey = "shokun";
+
 export const isPerson = (value: unknown): value is PersonKey => people.some((p) => p.key === value);
 export const personName = (key: string) => people.find((p) => p.key === key)?.name ?? key;
 export const personOf = (key: string) => people.find((p) => p.key === key);
