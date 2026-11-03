@@ -14,11 +14,12 @@ const untilLabel = (minutes: number) => {
 const title = (entry: TimelineEntry) => (entry.kind === "flight" ? entry.label : entry.activity.name);
 
 // What follows, so the card fills its place with something useful. Up to four
-// lines are rendered; a short screen shows two (see .hero-upcoming in globals.css).
+// lines are rendered; a short screen shows none, a tall one all (see .hero-extra
+// in globals.css).
 const UPCOMING = 4;
 function Upcoming({ label, entries }: { label: string; entries: TimelineEntry[] }) {
   if (!entries.length) return null;
-  return <div className="hero-upcoming mt-auto border-t border-[var(--line)] pt-1.5">
+  return <div className="hero-upcoming hero-extra mt-auto border-t border-[var(--line)] pt-1.5">
     <p className="text-[.72rem] font-medium tracking-[.1em] text-[var(--muted)] uppercase">{label}</p>
     <ul className="mt-1 grid gap-1">{entries.map((e) => <li key={e.id} className="flex min-w-0 gap-2.5 text-[.9rem]">
       <span className="shrink-0 font-semibold tabular-nums">{e.time}</span>
@@ -61,6 +62,7 @@ export function NextUp({ trip }: { trip: TripData }) {
   }
 
   const entries = dayEntries(trip, today);
+  const current = [...entries].reverse().find((e) => toMinutes(e.time) <= now.minutes);
   const next = entries.find((e) => toMinutes(e.time) > now.minutes);
   const following = next ? entries.slice(entries.indexOf(next) + 1, entries.indexOf(next) + 1 + UPCOMING) : [];
   const tomorrow = trip.days[trip.days.indexOf(today) + 1];
@@ -82,6 +84,8 @@ export function NextUp({ trip }: { trip: TripData }) {
             </div>
             <span className="hero-pill">{untilLabel(toMinutes(next.time) - now.minutes)}</span>
           </div>
+          {next.kind === "activity" && next.activity.description && <p className="hero-extra hero-desc mt-1 text-[.9rem] text-[var(--muted)]">{next.activity.description}</p>}
+          {current && <p className="hero-extra-xl mt-1.5 text-[.85rem] text-[var(--muted)]">ตอนนี้ · <span className="tabular-nums">{current.time}</span> {title(current)}</p>}
           {map && <a href={map} target="_blank" rel="noopener noreferrer" className="tap mt-2 inline-flex items-center gap-2 rounded-xl bg-[var(--ink)] px-4 text-[.9rem] font-medium text-[var(--on-dark)]"><MapPinned size={18}/>เปิดแผนที่</a>}
           <div className="h-2"/>
           <Upcoming label="ต่อจากนั้น" entries={following}/>

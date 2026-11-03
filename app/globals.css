@@ -282,8 +282,14 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
      give way on a screen that cannot hold everything. */
   .home > .page-enter > * { flex-shrink: 0; }
   .home > .page-enter > .hero { flex: 1 1 auto; min-height: 150px; }
+  /* The extras in the "next up" card (the description, what is on now, what
+     follows) are for screens with the height for them; an iPhone 12 keeps the
+     essentials so the six sections still fit without scrolling. */
+  .hero-extra, .hero-extra-xl { display: none; }
   .hero-upcoming li:nth-child(n + 3) { display: none; }
-  @media (min-height: 900px) { .hero-upcoming li:nth-child(n + 3) { display: flex; } }
+  .hero-desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+  @media (min-height: 900px) { .hero-extra { display: block; } .hero-extra.hero-desc { display: -webkit-box; } }
+  @media (min-height: 1000px) { .hero-extra-xl { display: block; } .hero-desc { -webkit-line-clamp: 2; } .hero-upcoming li:nth-child(n + 3) { display: flex; } }
 }
 @media (max-width: 700px) and (min-height: 780px) { .home { height: 100dvh; overflow: hidden; padding-bottom: calc(90px + env(safe-area-inset-bottom)); } .home .flight-card { padding: 13px 16px; } }
 /* The red dot: something new waits behind this icon. */

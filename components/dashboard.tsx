@@ -11,9 +11,10 @@ import { ChecklistButton } from "./checklist-button";
 import { FlightCard } from "./flight-card";
 import { NextUp } from "./next-up";
 import { WeatherStrip } from "./weather";
+import { Money } from "./money";
 
 // The home page: what matters today, top to bottom — the next thing on the plan,
-// the flights, polls, the weather ahead and the packing list. Every section keeps
+// the flights, polls, the weather ahead, yen in baht, and the packing list. Every section keeps
 // its place and its label whether or not it has anything to show yet, so the eye
 // learns where each thing lives.
 // A section with nothing in it yet keeps its card, so the layout holds still.
@@ -24,7 +25,7 @@ function Empty({ label, text, href }: { label: string; text: string; href?: stri
     : <div className="card flex items-center gap-3 border-dashed px-4 py-3">{body}</div>;
 }
 
-export function Dashboard({ trip, person, stay, polls, forecast, today }: { trip: TripData; person: PersonKey; stay: StayData | null; polls: PollData[]; forecast: ForecastByDate; today: string }) {
+export function Dashboard({ trip, person, stay, polls, forecast, rate, today }: { trip: TripData; person: PersonKey; stay: StayData | null; polls: PollData[]; forecast: ForecastByDate; rate: number | null; today: string }) {
   const open = polls.filter((p) => !p.closedAt);
   const waiting = open.filter((p) => !p.myVote);
   const dates = `${shortThaiDate(trip.startDate)} – ${shortThaiDate(trip.endDate)}`;
@@ -48,6 +49,7 @@ export function Dashboard({ trip, person, stay, polls, forecast, today }: { trip
         <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
       </Link>
       <WeatherStrip days={trip.days} forecast={forecast} today={today}/>
+      <div className="mt-2.5"><Money rate={rate}/></div>
       <div className="mt-2.5"><ChecklistButton person={person}/></div>
     </div>
     <BottomNav mapUrl={stay?.mapUrl ?? null} name={stay?.name} canManage={person === OWNER}/>
