@@ -7,7 +7,7 @@ import { useEffect, useSyncExternalStore } from "react";
 // live one. Only a production build registers it: in development the worker would
 // hand out stale chunks while the code is still changing.
 
-const WARM = ["/", "/plan", "/checklist", "/vote", "/settings"];
+const WARM = ["/", "/plan", "/flights", "/checklist", "/vote", "/settings"];
 
 function subscribe(listener: () => void) {
   window.addEventListener("online", listener);

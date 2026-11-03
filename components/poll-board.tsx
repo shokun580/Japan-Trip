@@ -8,11 +8,14 @@ import { OWNER, people, personName } from "@/lib/people";
 import { castVote, closePoll, createPoll, deletePoll, reopenPoll } from "@/app/vote/actions";
 import { alertError, confirmAction, toastSuccess } from "@/lib/alerts";
 import { Field } from "./field";
+import { DecideTabs } from "./decide-tabs";
+import { BottomNav } from "./bottom-nav";
+import type { NavData } from "@/lib/nav";
 
 const REFRESH_MS = 20_000;
 const timeLabel = (iso: string) => new Date(iso).toLocaleString("th-TH", { timeZone: "Asia/Tokyo", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
-export function PollBoard({ person, polls, live }: { person: string; polls: PollData[]; live: boolean }) {
+export function PollBoard({ person, polls, live, nav }: { person: string; polls: PollData[]; live: boolean; nav: NavData }) {
   const router = useRouter();
   const [creating, setCreating] = useState(false);
 
@@ -38,6 +41,7 @@ export function PollBoard({ person, polls, live }: { person: string; polls: Poll
       <h1 className="text-[1.45rem] leading-tight font-bold tracking-tight">โหวต</h1>
       <p className="mt-1 text-[.92rem] text-[var(--muted)]">ใครตั้งคำถามก็ได้ ทุกคนโหวตได้คนละเสียงแบบลับ เปลี่ยนใจได้จนกว่าจะปิดโหวต แล้วค่อยเห็นคะแนน</p>
     </div>
+    <DecideTabs/>
 
     {!live && <p className="mt-4 rounded-2xl border border-dashed border-[var(--line-strong)] p-3 text-[.85rem] text-[var(--muted)]">โหมดตัวอย่าง: ยังไม่ได้ต่อฐานข้อมูล จึงยังตั้งโหวตไม่ได้</p>}
 
@@ -53,6 +57,7 @@ export function PollBoard({ person, polls, live }: { person: string; polls: Poll
     </section>}
 
     {creating && <CreateSheet onClose={() => setCreating(false)}/>}
+    <BottomNav {...nav}/>
   </main>;
 }
 

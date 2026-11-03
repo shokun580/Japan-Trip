@@ -8,13 +8,15 @@ import type { PackingCategoryData, PackingItemData } from "@/lib/types";
 import { readLastChecklist, readOpenCategories, writeLastChecklist, writeOpenCategories } from "@/lib/checklist-store";
 import { addCategory, addItem, clearChecks, loadChecklist, removeCategory, removeItem, renameCategory, renameItem, resetChecklist, setItemChecked } from "@/app/checklist/actions";
 import { Field } from "./field";
+import { BottomNav } from "./bottom-nav";
+import type { NavData } from "@/lib/nav";
 
 const countOf = (categories: PackingCategoryData[]) => {
   const items = categories.flatMap((c) => c.items);
   return { done: items.filter((i) => i.checked).length, total: items.length };
 };
 
-export function ChecklistApp({ person }: { person: PersonKey }) {
+export function ChecklistApp({ person, nav }: { person: PersonKey; nav: NavData }) {
   // Keyed by person so switching shows the loader instead of the previous list.
   const [loaded, setLoaded] = useState<{ person: string; categories: PackingCategoryData[]; saved: boolean } | null>(null);
   const [failure, setFailure] = useState<{ person: string; message: string } | null>(null);
@@ -224,6 +226,7 @@ export function ChecklistApp({ person }: { person: PersonKey }) {
 
       <button onClick={() => void createCategory()} className="tap mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--line-strong)] text-[.95rem] font-medium text-[var(--muted)]"><Plus size={19} />เพิ่มหมวดหมู่</button>
     </>}
+    <BottomNav {...nav}/>
   </main>;
 }
 

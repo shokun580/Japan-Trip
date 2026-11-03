@@ -36,10 +36,10 @@ export function Dashboard({ trip, person, stay, polls, forecast, today }: { trip
     <div className="page-enter">
       <AppHeader name={trip.name} dates={dates} compact/>
       <NextUp trip={trip}/>
-      <div className="mt-3">{hasFlights
+      <div className="mt-2.5">{hasFlights
         ? <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
         : <Empty label="เที่ยวบิน" text="ยังไม่ได้ตั้งเวลาเที่ยวบิน" href={person === OWNER ? "/manage/flight" : undefined}/>}</div>
-      <Link href="/vote" className="card mt-3 flex items-center gap-3 px-4 py-3 transition-transform active:scale-[.99]" aria-label="ไปหน้าโหวต">
+      <Link href="/vote" className="card mt-2.5 flex items-center gap-3 px-4 py-2.5 transition-transform active:scale-[.99]" aria-label="ไปหน้าโหวต">
         <span className="flight-icon" data-tone={waiting.length ? "accent" : undefined}><Vote size={20}/></span>
         <span className="min-w-0 flex-1">
           <span className="eyebrow block">โหวต</span>
@@ -48,7 +48,7 @@ export function Dashboard({ trip, person, stay, polls, forecast, today }: { trip
         <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
       </Link>
       <WeatherStrip days={trip.days} forecast={forecast} today={today}/>
-      <div className="mt-3"><ChecklistButton person={person}/></div>
+      <div className="mt-2.5"><ChecklistButton person={person}/></div>
     </div>
     <BottomNav mapUrl={stay?.mapUrl ?? null} name={stay?.name} canManage={person === OWNER}/>
   </main>;

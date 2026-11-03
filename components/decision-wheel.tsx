@@ -3,6 +3,9 @@ import Link from "next/link";
 import { ChevronLeft, Plus, RotateCw, Trash2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { Field } from "./field";
+import { DecideTabs } from "./decide-tabs";
+import { BottomNav } from "./bottom-nav";
+import type { NavData } from "@/lib/nav";
 
 // Spin to settle what nobody will decide. The wheel starts empty every time and
 // keeps nothing anywhere; a poll can hand its options over through the page's ?o=.
@@ -20,7 +23,7 @@ function sectorPath(i: number, n: number) {
   return `M50 50 L${x0} ${y0} A50 50 0 ${n === 1 ? 1 : 0} 1 ${x1} ${y1} Z`;
 }
 
-export function DecisionWheel({ initial }: { initial: string[] | null }) {
+export function DecisionWheel({ initial, nav }: { initial: string[] | null; nav: NavData }) {
   const [items, setItems] = useState<string[]>(() => initial ?? []);
   const [draft, setDraft] = useState("");
   const [angle, setAngle] = useState(0);
@@ -61,6 +64,7 @@ export function DecisionWheel({ initial }: { initial: string[] | null }) {
       <h1 className="text-[1.45rem] leading-tight font-bold tracking-tight">วงล้อตัดสินใจ</h1>
       <p className="mt-1 text-[.92rem] text-[var(--muted)]">ใส่ตัวเลือก แล้วให้วงล้อเลือกให้</p>
     </div>
+    <DecideTabs/>
 
     <section className="relative mx-auto mt-6 w-[min(100%,340px)]" aria-label="วงล้อ">
       <span className="wheel-pointer" aria-hidden/>
@@ -103,5 +107,6 @@ export function DecisionWheel({ initial }: { initial: string[] | null }) {
       </form>}
       {n > 0 && <button type="button" onClick={() => { setItems([]); setWinner(null); }} disabled={spinning} className="tap mt-2 inline-flex items-center gap-1.5 rounded-xl px-2 text-[.88rem] font-medium text-[var(--muted)] disabled:opacity-40"><X size={16}/>ล้างทั้งหมด</button>}
     </section>
+    <BottomNav {...nav}/>
   </main>;
 }

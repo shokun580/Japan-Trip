@@ -1,13 +1,15 @@
 "use client";
-import { ChevronDown, PlaneLanding, PlaneTakeoff } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight, PlaneLanding, PlaneTakeoff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { shortThaiDate } from "@/lib/format";
 import { countdownLabel, departureAt } from "@/lib/timeline";
 import type { FlightData } from "@/lib/types";
 
-export function FlightCard({ outbound, inbound }: { outbound: FlightData; inbound: FlightData }) {
+// `all` shows both legs; the home page shows one and links here for the rest, so
+// the card's height never changes under the cards below it.
+export function FlightCard({ outbound, inbound, all = false }: { outbound: FlightData; inbound: FlightData; all?: boolean }) {
   const [now, setNow] = useState(() => new Date());
-  const [open, setOpen] = useState(false);
   useEffect(() => { const timer = window.setInterval(() => setNow(new Date()), 60_000); return () => clearInterval(timer); }, []);
 
   const legs = useMemo(() => ([
@@ -22,17 +24,17 @@ export function FlightCard({ outbound, inbound }: { outbound: FlightData; inboun
   // Only the soonest leg still ahead carries the countdown. Once it departs the next
   // leg picks it up, and when none are left every row reads "ออกเดินทางแล้ว".
   const next = legs.find((leg) => leg.at.getTime() > now.getTime());
-  // Collapsed, the card shows the leg that matters now — the next departure, or the
-  // final one once the whole trip has flown.
-  const shown = open ? legs : [next ?? legs[legs.length - 1]];
+  // On the home page the card shows the leg that matters now — the next departure,
+  // or the final one once the whole trip has flown.
+  const shown = all ? legs : [next ?? legs[legs.length - 1]];
 
   return <section className="flight-card" aria-label="เที่ยวบินขาไปและขากลับ">
-    {legs.length > 1
-      ? <button type="button" className="flight-card-head" onClick={() => setOpen(!open)} aria-expanded={open}>
-          <span className="flight-card-title">Flights</span>
-          <span className="flight-card-toggle">{open ? "ย่อ" : "ดูทั้งหมด"}<ChevronDown size={15} className={open ? "rotate-180 transition-transform" : "transition-transform"}/></span>
-        </button>
-      : <p className="flight-card-title">Flights</p>}
+    {all
+      ? <p className="flight-card-title">Flights</p>
+      : <Link href="/flights" className="flight-card-head">
+          <span className="flight-card-title">เที่ยวบิน</span>
+          <span className="flight-card-toggle">ดูทั้งหมด<ChevronRight size={15}/></span>
+        </Link>}
 
     {shown.map((leg) => <div key={leg.direction} className="flight-leg-row">
       <span className="flight-icon"><leg.Icon size={21}/></span>
@@ -45,6 +47,6 @@ export function FlightCard({ outbound, inbound }: { outbound: FlightData; inboun
         : leg.at.getTime() <= now.getTime() ? <span className="flight-pill">ออกเดินทางแล้ว</span> : null}
     </div>)}
 
-    {open && <p className="mt-3 text-[.74rem] text-[var(--on-dark-soft)]">เวลาท้องถิ่นของสนามบินต้นทางแต่ละขา</p>}
+    {all && <p className="mt-3 text-[.74rem] text-[var(--on-dark-soft)]">เวลาท้องถิ่นของสนามบินต้นทางแต่ละขา</p>}
   </section>;
 }

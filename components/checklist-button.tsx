@@ -18,7 +18,7 @@ export function ChecklistButton({ person }: { person: PersonKey }) {
 
   const percent = progress?.total ? (progress.done / progress.total) * 100 : 0;
 
-  return <Link href="/checklist" className="card mt-4 flex items-center gap-3 p-4 transition-transform active:scale-[.99]" aria-label="เปิดเช็คลิสต์ของใช้">
+  return <Link href="/checklist" className="card flex items-center gap-3 px-4 py-3 transition-transform active:scale-[.99]" aria-label="เปิดเช็คลิสต์ของใช้">
     <span className="flight-icon"><ListChecks size={21} /></span>
     <span className="min-w-0 flex-1">
       <span className="flex items-baseline gap-2">

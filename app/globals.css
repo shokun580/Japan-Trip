@@ -263,17 +263,26 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 .nav-stay[data-empty="true"] .nav-stay-button::after { display: none; }
 @media (prefers-reduced-motion: reduce) { .nav-stay-button::after { animation: none; opacity: .7; } }
 /* Home page (components/dashboard.tsx) ---------------------------------------- */
+/* The "next up" card is the one the eye should land on: a wash of accent across
+   the top corner, a faint compass behind, a big time and an accent pill. */
+.hero { position: relative; overflow: hidden; border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 20%, var(--card)), var(--card) 62%); }
+.hero-mark { position: absolute; right: -22px; bottom: -26px; width: 150px; height: 150px; color: var(--accent); opacity: .08; pointer-events: none; }
+.hero-time { font-size: 2.1rem; line-height: 1; font-weight: 700; letter-spacing: -.02em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.hero-number { font-size: 3.4rem; line-height: .9; font-weight: 700; letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.hero-pill { flex: 0 0 auto; margin-top: 4px; padding: 6px 12px; border-radius: 999px; background: var(--accent); color: var(--snow); font-size: .8rem; font-weight: 600; white-space: nowrap; box-shadow: 0 6px 16px var(--accent-ring); }
 /* On a phone the home page is laid out to the screen: it never scrolls, the "next
    up" card takes the height the other cards leave, and a whole day's list scrolls
    inside that card. A screen too short to hold it all falls back to scrolling. */
 @media (max-width: 700px) {
   .home { display: flex; flex-direction: column; min-height: 100dvh; }
   .home > .page-enter { display: flex; flex: 1; flex-direction: column; min-height: 0; }
-  .home .hero { flex: 1; min-height: 0; }
-  .home .hero-day { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
-  .home .hero-day::-webkit-scrollbar { display: none; }
+  /* Cards keep their own height; whatever is left over goes between them. Only the
+     "next up" card may give way on a screen that cannot hold everything. */
+  .home > .page-enter { justify-content: space-between; }
+  .home > .page-enter > * { flex-shrink: 0; }
+  .home > .page-enter > .hero { flex-shrink: 1; min-height: 150px; }
 }
-@media (max-width: 700px) and (min-height: 780px) { .home { height: 100dvh; overflow: hidden; } }
+@media (max-width: 700px) and (min-height: 780px) { .home { height: 100dvh; overflow: hidden; padding-bottom: calc(90px + env(safe-area-inset-bottom)); } .home .flight-card { padding: 13px 16px; } }
 /* Polls (components/poll-board.tsx) ------------------------------------------- */
 /* The share of votes is a bar painted behind the row; the row itself stays a button
    so a tap anywhere on it is a vote. */

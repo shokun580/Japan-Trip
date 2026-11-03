@@ -30,14 +30,14 @@ export function WeatherLine({ forecast }: { forecast: Forecast | undefined }) {
 export function WeatherStrip({ days, forecast, today }: { days: DayData[]; forecast: ForecastByDate; today: string }) {
   const shown = days.filter((d) => d.date >= today && forecast[d.date]);
   if (!shown.length) return <div className="card mt-3 flex items-center gap-3 border-dashed px-4 py-3"><span className="min-w-0 flex-1"><span className="eyebrow block">อากาศ</span><span className="block truncate text-[.92rem] text-[var(--muted)]">ยังไม่มีพยากรณ์สำหรับวันเดินทาง</span></span></div>;
-  return <section className="card mt-3 px-4 pt-3 pb-3" aria-label="พยากรณ์อากาศ">
+  return <section className="card mt-2.5 px-4 pt-2.5 pb-2.5" aria-label="พยากรณ์อากาศ">
     <div className="flex items-baseline justify-between"><p className="eyebrow">อากาศ</p><p className="text-[.72rem] text-[var(--muted)]">ตามเมืองของแต่ละวัน</p></div>
     <ul className="slider mt-2 -mx-1 flex gap-2 px-1">{shown.map((d) => {
       const f = forecast[d.date], { label, Icon } = describe(f.code);
       const isToday = d.date === today;
-      return <li key={d.id} className={`flex w-[74px] shrink-0 flex-col items-center rounded-2xl border px-1.5 py-2 text-center ${isToday ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--on-dark)]" : "border-[var(--line)]"}`} aria-label={`${dayLabel(d.date)} ${label} สูงสุด ${f.high} ต่ำสุด ${f.low} โอกาสฝน ${f.rain}%`}>
+      return <li key={d.id} className={`flex w-[74px] shrink-0 flex-col items-center rounded-2xl border px-1.5 py-1.5 text-center ${isToday ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--on-dark)]" : "border-[var(--line)]"}`} aria-label={`${dayLabel(d.date)} ${label} สูงสุด ${f.high} ต่ำสุด ${f.low} โอกาสฝน ${f.rain}%`}>
         <span className="text-[.78rem] font-medium">{isToday ? "วันนี้" : dayLabel(d.date)}</span>
-        <Icon size={24} className="my-1" aria-hidden/>
+        <Icon size={22} className="my-0.5" aria-hidden/>
         <span className="text-[.95rem] font-semibold tabular-nums">{f.high}°<span className={`font-normal ${isToday ? "text-[var(--on-dark-soft)]" : "text-[var(--muted)]"}`}>/{f.low}°</span></span>
         <span className={`mt-0.5 text-[.72rem] ${isToday ? "text-[var(--on-dark-soft)]" : "text-[var(--muted)]"}`}>{f.rain >= 30 ? `ฝน ${f.rain}%` : label}</span>
       </li>;

@@ -1,16 +1,10 @@
 "use client";
 import Link from "next/link";
-import { ChevronRight, MapPinned } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Compass, MapPinned } from "lucide-react";
 import type { TripData } from "@/lib/types";
 import { dayLabel } from "@/lib/format";
 import { dayEntries, toMinutes, type TimelineEntry } from "@/lib/timeline";
 import { useTokyoNow } from "@/lib/use-tokyo-now";
-import { Timeline } from "./timeline";
-
-const WHOLE_DAY = "japan-trip.home.whole-day";
-const readWholeDay = () => { try { return window.localStorage.getItem(WHOLE_DAY) === "1"; } catch { return false; } };
-const writeWholeDay = (on: boolean) => { try { window.localStorage.setItem(WHOLE_DAY, on ? "1" : "0"); } catch { /* nothing to remember it with */ } };
 
 const untilLabel = (minutes: number) => {
   if (minutes < 1) return "ตอนนี้";
@@ -19,16 +13,27 @@ const untilLabel = (minutes: number) => {
 };
 const title = (entry: TimelineEntry) => (entry.kind === "flight" ? entry.label : entry.activity.name);
 
-// The first thing on the home page: where the day stands right now. What is going
-// on, what comes next and in how long, and the way to the full plan. Before the
-// trip it counts the days down; after it, it says goodbye.
+// A line or two of what follows, so the card fills its place with something useful.
+function Upcoming({ label, entries }: { label: string; entries: TimelineEntry[] }) {
+  if (!entries.length) return null;
+  return <div className="mt-2 border-t border-[var(--line)] pt-1.5">
+    <p className="text-[.72rem] font-medium tracking-[.1em] text-[var(--muted)] uppercase">{label}</p>
+    <ul className="mt-1 grid gap-1">{entries.map((e) => <li key={e.id} className="flex min-w-0 gap-2.5 text-[.9rem]">
+      <span className="shrink-0 font-semibold tabular-nums">{e.time}</span>
+      <span className="min-w-0 truncate">{title(e)}</span>
+    </li>)}</ul>
+  </div>;
+}
+
+// The first thing on the home page: where the day stands right now. What comes
+// next and in how long, what follows it, and the way to the full plan. Before the
+// trip it counts the days down over the first day's plan; after it, it says goodbye.
+// Its height does not depend on the clock: nothing on the page moves as time passes.
 export function NextUp({ trip }: { trip: TripData }) {
   const now = useTokyoNow();
-  const [wholeDay, setWholeDay] = useState(() => (typeof window === "undefined" ? false : readWholeDay()));
-  const toggle = () => { setWholeDay((v) => { writeWholeDay(!v); return !v; }); };
 
   // Null before hydration: the card holds its shape so nothing jumps.
-  if (!now) return <section className="card hero p-4 sm:p-5" aria-busy="true"><p className="eyebrow">ถัดไป</p><div className="skeleton-line mt-3 h-6 w-48"/><div className="skeleton-line mt-2 h-4 w-32"/></section>;
+  if (!now) return <section className="card hero p-4 sm:p-5" aria-busy="true"><p className="eyebrow">ถัดไป</p><div className="skeleton-line mt-3 h-9 w-40"/><div className="skeleton-line mt-2 h-4 w-32"/><div className="skeleton-line mt-6 h-4 w-48"/><div className="skeleton-line mt-2 h-4 w-40"/></section>;
 
   const today = trip.days.find((d) => d.date === now.date);
   const daysUntil = Math.round((Date.parse(trip.startDate) - Date.parse(now.date)) / 86_400_000);
@@ -36,56 +41,50 @@ export function NextUp({ trip }: { trip: TripData }) {
   if (!today) {
     const first = trip.days[0];
     const after = now.date > trip.endDate;
-    return <section className="card hero p-4 sm:p-5">
-      <p className="eyebrow">ถัดไป · {after ? "จบทริปแล้ว" : "ก่อนออกเดินทาง"}</p>
-      <h2 className="mt-1 text-[1.3rem] leading-snug font-bold">{after ? "กลับถึงบ้านแล้ว เก็บความทรงจำดีๆ ไว้นะ" : daysUntil === 1 ? "พรุ่งนี้ออกเดินทางแล้ว" : `อีก ${daysUntil} วันออกเดินทาง`}</h2>
-      {!after && first && <p className="mt-1 text-[.92rem] text-[var(--muted)]">วันแรก {dayLabel(first.date)} · {first.title}</p>}
-      <Link href="/plan" className="tap mt-3 inline-flex items-center gap-1 rounded-xl bg-[var(--sky)] px-4 text-[.92rem] font-medium">ดูแผนทั้งทริป<ChevronRight size={18}/></Link>
+    return <section className="card hero p-4 sm:p-5" aria-label="ถัดไป">
+      <Compass className="hero-mark" aria-hidden/>
+      <Link href="/plan" className="flex items-center justify-between gap-3">
+        <p className="eyebrow">ถัดไป · {after ? "จบทริปแล้ว" : "ก่อนออกเดินทาง"}</p>
+        <span className="inline-flex shrink-0 items-center gap-0.5 text-[.85rem] font-medium text-[var(--muted)]">ดูทั้งทริป<ChevronRight size={17}/></span>
+      </Link>
+      {after
+        ? <h2 className="mt-3 text-[1.35rem] leading-snug font-bold">กลับถึงบ้านแล้ว เก็บความทรงจำดีๆ ไว้นะ</h2>
+        : <div className="mt-2 flex items-end gap-2">
+            <span className="hero-number">{daysUntil}</span>
+            <span className="pb-2 text-[1.1rem] leading-tight font-semibold">{daysUntil === 1 ? "วัน · พรุ่งนี้ออกเดินทาง" : "วัน"}<span className="block text-[.85rem] font-normal text-[var(--muted)]">ถึงวันออกเดินทาง</span></span>
+          </div>}
+      {!after && first && <Upcoming label={`วันแรก · ${dayLabel(first.date)} ${first.title}`} entries={dayEntries(trip, first).slice(0, 2)}/>}
     </section>;
   }
 
   const entries = dayEntries(trip, today);
-  const current = [...entries].reverse().find((e) => toMinutes(e.time) <= now.minutes);
   const next = entries.find((e) => toMinutes(e.time) > now.minutes);
+  const following = next ? entries.slice(entries.indexOf(next) + 1, entries.indexOf(next) + 2) : [];
   const tomorrow = trip.days[trip.days.indexOf(today) + 1];
-  const tomorrowFirst = tomorrow ? dayEntries(trip, tomorrow)[0] : undefined;
-  const lead = next ?? current;
-  const map = lead?.kind === "activity" ? lead.activity.mapUrl : null;
+  const map = next?.kind === "activity" ? next.activity.mapUrl : null;
 
-  return <section className="card hero flex flex-col p-4 sm:p-5" aria-label="ตอนนี้และถัดไป">
+  return <section className="card hero p-4 sm:p-5" aria-label="ถัดไป">
+    <Compass className="hero-mark" aria-hidden/>
     <Link href={`/plan?day=${today.id}`} className="flex items-center justify-between gap-3">
-      <div className="min-w-0">
-        <p className="eyebrow">ถัดไป · Day {trip.days.indexOf(today) + 1}</p>
-        <p className="truncate text-[.92rem] font-medium">{dayLabel(today.date)} · {today.title}</p>
-      </div>
+      <p className="eyebrow truncate">ถัดไป · Day {trip.days.indexOf(today) + 1} · {today.title}</p>
       <span className="inline-flex shrink-0 items-center gap-0.5 text-[.85rem] font-medium text-[var(--muted)]">ดูทั้งทริป<ChevronRight size={17}/></span>
     </Link>
 
-    <div className="mt-4">
-      {next
-        ? <>
-            <p className="text-[.78rem] font-medium text-[var(--accent)]">ถัดไป · {untilLabel(toMinutes(next.time) - now.minutes)}</p>
-            <h2 className="mt-0.5 text-[1.35rem] leading-snug font-bold"><span className="tabular-nums">{next.time}</span> {title(next)}</h2>
-            {next.kind === "activity" && next.activity.description && <p className="mt-1 line-clamp-2 text-[.92rem] text-[var(--muted)]">{next.activity.description}</p>}
-          </>
-        : entries.length
-          ? <>
-              <p className="text-[.78rem] font-medium text-[var(--muted)]">หมดแผนของวันนี้แล้ว</p>
-              <h2 className="mt-0.5 text-[1.35rem] leading-snug font-bold">พักผ่อนได้เลย</h2>
-              {tomorrowFirst && tomorrow && <p className="mt-1 text-[.92rem] text-[var(--muted)]">พรุ่งนี้เริ่ม {tomorrowFirst.time} · {title(tomorrowFirst)}</p>}
-            </>
-          : <>
-              <p className="text-[.78rem] font-medium text-[var(--muted)]">วันนี้ยังไม่มีแผน</p>
-              <h2 className="mt-0.5 text-[1.35rem] leading-snug font-bold">วันว่าง ตามใจเลย</h2>
-            </>}
-      {current && next && <p className="mt-2 text-[.85rem] text-[var(--muted)]">ตอนนี้: <span className="tabular-nums">{current.time}</span> {title(current)}</p>}
-    </div>
-
-    <div className="mt-3 flex flex-wrap gap-2">
-      {map && <a href={map} target="_blank" rel="noopener noreferrer" className="tap inline-flex items-center gap-2 rounded-xl bg-[var(--sky)] px-4 text-[.92rem] font-medium"><MapPinned size={19}/>เปิดแผนที่</a>}
-      {entries.length > 0 && <button type="button" onClick={toggle} aria-pressed={wholeDay} className="tap inline-flex items-center gap-2 rounded-xl border border-[var(--line)] px-4 text-[.92rem] font-medium">{wholeDay ? "ย่อเหลือถัดไป" : "ดูทั้งวัน"}</button>}
-    </div>
-
-    {wholeDay && entries.length > 0 && <div className="hero-day -mx-1 px-1"><Timeline date={today.date} entries={entries}/></div>}
+    {next
+      ? <>
+          <div className="mt-2 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="hero-time">{next.time}</p>
+              <h2 className="line-clamp-2 text-[1.2rem] leading-snug font-bold">{title(next)}</h2>
+            </div>
+            <span className="hero-pill">{untilLabel(toMinutes(next.time) - now.minutes)}</span>
+          </div>
+          {map && <a href={map} target="_blank" rel="noopener noreferrer" className="tap mt-2 inline-flex items-center gap-2 rounded-xl bg-[var(--ink)] px-4 text-[.9rem] font-medium text-[var(--on-dark)]"><MapPinned size={18}/>เปิดแผนที่</a>}
+          <Upcoming label="ต่อจากนั้น" entries={following}/>
+        </>
+      : <>
+          <h2 className="mt-3 text-[1.35rem] leading-snug font-bold">{entries.length ? "หมดแผนของวันนี้แล้ว พักผ่อนได้เลย" : "วันนี้ยังไม่มีแผน ตามใจเลย"}</h2>
+          {tomorrow && <Upcoming label={`พรุ่งนี้ · ${dayLabel(tomorrow.date)} ${tomorrow.title}`} entries={dayEntries(trip, tomorrow).slice(0, 2)}/>}
+        </>}
   </section>;
 }
