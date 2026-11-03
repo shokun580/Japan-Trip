@@ -28,7 +28,7 @@ export function NextUp({ trip }: { trip: TripData }) {
   const toggle = () => { setWholeDay((v) => { writeWholeDay(!v); return !v; }); };
 
   // Null before hydration: the card holds its shape so nothing jumps.
-  if (!now) return <section className="card hero p-4 sm:p-5" aria-busy="true"><p className="eyebrow">วันนี้</p><div className="skeleton-line mt-3 h-6 w-48"/><div className="skeleton-line mt-2 h-4 w-32"/></section>;
+  if (!now) return <section className="card hero p-4 sm:p-5" aria-busy="true"><p className="eyebrow">ถัดไป</p><div className="skeleton-line mt-3 h-6 w-48"/><div className="skeleton-line mt-2 h-4 w-32"/></section>;
 
   const today = trip.days.find((d) => d.date === now.date);
   const daysUntil = Math.round((Date.parse(trip.startDate) - Date.parse(now.date)) / 86_400_000);
@@ -37,7 +37,7 @@ export function NextUp({ trip }: { trip: TripData }) {
     const first = trip.days[0];
     const after = now.date > trip.endDate;
     return <section className="card hero p-4 sm:p-5">
-      <p className="eyebrow">{after ? "จบทริปแล้ว" : "ก่อนออกเดินทาง"}</p>
+      <p className="eyebrow">ถัดไป · {after ? "จบทริปแล้ว" : "ก่อนออกเดินทาง"}</p>
       <h2 className="mt-1 text-[1.3rem] leading-snug font-bold">{after ? "กลับถึงบ้านแล้ว เก็บความทรงจำดีๆ ไว้นะ" : daysUntil === 1 ? "พรุ่งนี้ออกเดินทางแล้ว" : `อีก ${daysUntil} วันออกเดินทาง`}</h2>
       {!after && first && <p className="mt-1 text-[.92rem] text-[var(--muted)]">วันแรก {dayLabel(first.date)} · {first.title}</p>}
       <Link href="/plan" className="tap mt-3 inline-flex items-center gap-1 rounded-xl bg-[var(--sky)] px-4 text-[.92rem] font-medium">ดูแผนทั้งทริป<ChevronRight size={18}/></Link>
@@ -55,7 +55,7 @@ export function NextUp({ trip }: { trip: TripData }) {
   return <section className="card hero flex flex-col p-4 sm:p-5" aria-label="ตอนนี้และถัดไป">
     <Link href={`/plan?day=${today.id}`} className="flex items-center justify-between gap-3">
       <div className="min-w-0">
-        <p className="eyebrow">วันนี้ · Day {trip.days.indexOf(today) + 1}</p>
+        <p className="eyebrow">ถัดไป · Day {trip.days.indexOf(today) + 1}</p>
         <p className="truncate text-[.92rem] font-medium">{dayLabel(today.date)} · {today.title}</p>
       </div>
       <span className="inline-flex shrink-0 items-center gap-0.5 text-[.85rem] font-medium text-[var(--muted)]">ดูทั้งทริป<ChevronRight size={17}/></span>

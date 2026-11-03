@@ -22,7 +22,7 @@ export function ChecklistButton({ person }: { person: PersonKey }) {
     <span className="flight-icon"><ListChecks size={21} /></span>
     <span className="min-w-0 flex-1">
       <span className="flex items-baseline gap-2">
-        <span className="truncate font-semibold">เช็คลิสต์ของใช้</span>
+        <span className="eyebrow">เช็คลิสต์</span>
         <span className="shrink-0 text-[.8rem] text-[var(--muted)]">· {personName(person)}</span>
       </span>
       {progress

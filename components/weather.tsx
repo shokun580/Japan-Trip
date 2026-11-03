@@ -29,10 +29,10 @@ export function WeatherLine({ forecast }: { forecast: Forecast | undefined }) {
 // Days past the forecast's reach are simply not there yet.
 export function WeatherStrip({ days, forecast, today }: { days: DayData[]; forecast: ForecastByDate; today: string }) {
   const shown = days.filter((d) => d.date >= today && forecast[d.date]);
-  if (!shown.length) return null;
-  return <section className="card mt-3 p-4" aria-label="พยากรณ์อากาศ">
-    <div className="flex items-baseline justify-between"><p className="eyebrow">อากาศ</p><p className="text-[.72rem] text-[var(--muted)]">Open-Meteo · ตามเมืองของแต่ละวัน</p></div>
-    <ul className="slider mt-3 -mx-1 flex gap-2 px-1">{shown.map((d) => {
+  if (!shown.length) return <div className="card mt-3 flex items-center gap-3 border-dashed px-4 py-3"><span className="min-w-0 flex-1"><span className="eyebrow block">อากาศ</span><span className="block truncate text-[.92rem] text-[var(--muted)]">ยังไม่มีพยากรณ์สำหรับวันเดินทาง</span></span></div>;
+  return <section className="card mt-3 px-4 pt-3 pb-3" aria-label="พยากรณ์อากาศ">
+    <div className="flex items-baseline justify-between"><p className="eyebrow">อากาศ</p><p className="text-[.72rem] text-[var(--muted)]">ตามเมืองของแต่ละวัน</p></div>
+    <ul className="slider mt-2 -mx-1 flex gap-2 px-1">{shown.map((d) => {
       const f = forecast[d.date], { label, Icon } = describe(f.code);
       const isToday = d.date === today;
       return <li key={d.id} className={`flex w-[74px] shrink-0 flex-col items-center rounded-2xl border px-1.5 py-2 text-center ${isToday ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--on-dark)]" : "border-[var(--line)]"}`} aria-label={`${dayLabel(d.date)} ${label} สูงสุด ${f.high} ต่ำสุด ${f.low} โอกาสฝน ${f.rain}%`}>
