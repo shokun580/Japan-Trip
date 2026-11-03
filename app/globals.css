@@ -285,11 +285,15 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
   /* The extras in the "next up" card (the description, what is on now, what
      follows) are for screens with the height for them; an iPhone 12 keeps the
      essentials so the six sections still fit without scrolling. */
+  /* Nothing inside the card shrinks or slides over its neighbour: short of room,
+     the list at the bottom is clipped by the card's edge instead. */
+  .home .hero > * { flex-shrink: 0; }
   .hero-extra, .hero-extra-xl { display: none; }
   .hero-upcoming li:nth-child(n + 3) { display: none; }
   .hero-desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
-  @media (min-height: 900px) { .hero-extra { display: block; } .hero-extra.hero-desc { display: -webkit-box; } }
-  @media (min-height: 1000px) { .hero-extra-xl { display: block; } .hero-desc { -webkit-line-clamp: 2; } .hero-upcoming li:nth-child(n + 3) { display: flex; } }
+  /* 956px is a Pro Max; the card holds the description and two lines there. */
+  @media (min-height: 950px) { .hero-extra { display: block; } .hero-extra.hero-desc { display: -webkit-box; } }
+  @media (min-height: 1050px) { .hero-extra-xl { display: block; } .hero-desc { -webkit-line-clamp: 2; } .hero-upcoming li:nth-child(n + 3) { display: flex; } }
 }
 @media (max-width: 700px) and (min-height: 780px) { .home { height: 100dvh; overflow: hidden; padding-bottom: calc(90px + env(safe-area-inset-bottom)); } .home .flight-card { padding: 13px 16px; } }
 /* The red dot: something new waits behind this icon. */

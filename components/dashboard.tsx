@@ -3,6 +3,7 @@ import { ChevronRight, Vote } from "lucide-react";
 import type { PersonKey } from "@/lib/people";
 import type { PollData, StayData, TripData } from "@/lib/types";
 import type { ForecastByDate } from "@/lib/weather";
+import type { YenRate } from "@/lib/rates";
 import { OWNER } from "@/lib/people";
 import { shortThaiDate } from "@/lib/format";
 import { AppHeader } from "./app-header";
@@ -25,7 +26,7 @@ function Empty({ label, text, href }: { label: string; text: string; href?: stri
     : <div className="card flex items-center gap-3 border-dashed px-4 py-3">{body}</div>;
 }
 
-export function Dashboard({ trip, person, stay, polls, forecast, rate, today }: { trip: TripData; person: PersonKey; stay: StayData | null; polls: PollData[]; forecast: ForecastByDate; rate: number | null; today: string }) {
+export function Dashboard({ trip, person, stay, polls, forecast, rate, today }: { trip: TripData; person: PersonKey; stay: StayData | null; polls: PollData[]; forecast: ForecastByDate; rate: YenRate | null; today: string }) {
   const open = polls.filter((p) => !p.closedAt);
   const waiting = open.filter((p) => !p.myVote);
   const dates = `${shortThaiDate(trip.startDate)} – ${shortThaiDate(trip.endDate)}`;
