@@ -47,8 +47,10 @@ export function Money({ rate }: { rate: YenRate | null }) {
         <label className="money-box min-w-0 flex-1">
           <span className="sr-only">จำนวน{SIDES[from].name}</span>
           <input ref={box} value={amount ? Number(amount).toLocaleString("en-US") : ""} onChange={(e) => type(e.target.value)} inputMode="numeric" pattern="[0-9]*" autoComplete="off" placeholder="0" className="money-amount" aria-label={`จำนวน${SIDES[from].name}`}/>
-          {/* Holding mousedown back keeps the focus, and the phone keyboard, in the box. */}
-          {amount && <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={clear} className="field-clear" aria-label="ล้างจำนวน"><span><X size={13} strokeWidth={3}/></span></button>}
+          {/* Always there, so the box looks the same before and after typing; it only
+              wakes up once there is something to clear. Holding mousedown back keeps
+              the focus, and the phone keyboard, in the box. */}
+          <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={clear} disabled={!amount} className="field-clear money-clear" aria-label="ล้างจำนวน"><span><X size={13} strokeWidth={3}/></span></button>
         </label>
       </Row>
       {/* The swap sits on the line between the rows, where the eye expects it. */}
@@ -56,7 +58,9 @@ export function Money({ rate }: { rate: YenRate | null }) {
         <button type="button" onClick={swap} className="money-swap tap" aria-label="สลับสกุลเงิน"><ArrowUpDown size={15}/></button>
       </div>
       <Row side={to}>
-        <p className="money-result min-w-0 flex-1 truncate text-right font-bold tabular-nums" data-empty={!amount} aria-live="polite">{SIDES[to].sign}{format(value)}</p>
+        {/* The sign sits in the same column as the clear button above, so the two
+            numbers end on one edge. */}
+        <p className="money-result flex min-w-0 flex-1 items-baseline justify-end font-bold tabular-nums" data-empty={!amount} aria-live="polite"><span className="min-w-0 truncate">{format(value)}</span><span className="money-unit">{SIDES[to].sign}</span></p>
       </Row>
     </div>
   </section>;

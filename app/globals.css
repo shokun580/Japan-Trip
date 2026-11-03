@@ -337,12 +337,16 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 /* A bare, right-aligned box: the number is the point, not the field around it. */
 .money-amount { width: 100%; min-width: 0; min-height: 46px; padding: 0 12px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--paper) 70%, transparent); color: var(--ink); font-size: 1.25rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 .money-amount:focus { outline: 2px solid var(--accent-ring); outline-offset: 0; }
-.money-result { padding-right: 12px; font-size: 1.35rem; line-height: 1; }
+.money-result { font-size: 1.35rem; line-height: 1; }
+/* As wide as the clear button's column in the box above, so the sign sits under the X. */
+.money-unit { flex: 0 0 44px; text-align: center; font-size: .8em; font-weight: 600; color: var(--muted); }
 .money-result[data-empty="true"] { color: var(--muted); opacity: .6; }
 /* The amount box carries the same clear X as every other box, at its right end. */
 .money-box { position: relative; display: block; }
 .money-box .money-amount { padding-right: 44px; }
 .money-amount::placeholder { color: var(--muted); opacity: .5; }
+.money-clear { transition: opacity .15s ease; }
+.money-clear:disabled { cursor: default; opacity: .35; }
 .home .money-card .money-amount, .home .money-card .money-result { font-size: clamp(1.35rem, 4.2vh - 1rem, 2rem); }
 /* Each currency gets a full-height row, and the amount sits in a soft pill that
    reads as the place to tap, so the box is easy to hit with a thumb. */
