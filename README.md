@@ -12,6 +12,15 @@ Mobile-first itinerary companion built with Next.js App Router, TypeScript, Tail
 
 Without `DATABASE_URL`, the app runs with read-only demo data so the UI can be previewed safely.
 
+## Pages
+
+`/` is the day's dashboard — next up on the plan, flights, any open poll, the weather
+ahead (Open-Meteo, no key, per city of each day) and the checklist — laid out to fit
+one phone screen. `/plan` is the full itinerary, `/vote` and `/wheel` the group's
+decisions, `/settings` the person, theme, patch notes and (for โชกุน) the manage pages.
+The version shown there is `APP_VERSION` in `lib/changelog.ts`, kept equal to
+package.json.
+
 ## Who is using the app
 
 Opening any page first asks who you are (`/login`). Picking a name from

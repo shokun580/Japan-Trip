@@ -19,9 +19,11 @@ export function Dashboard({ trip, person, stay, polls, forecast, today }: { trip
   const waiting = open.filter((p) => !p.myVote);
   const dates = `${shortThaiDate(trip.startDate)} – ${shortThaiDate(trip.endDate)}`;
 
-  return <main className="shell">
+  // On a phone the page is laid out to the screen (see .home in globals.css): no
+  // scrolling, the "next up" card takes whatever height is left.
+  return <main className="shell home">
     <div className="page-enter">
-      <AppHeader name={trip.name} dates={dates} person={person}/>
+      <AppHeader name={trip.name} dates={dates} compact/>
       <NextUp trip={trip}/>
       <div className="mt-3"><FlightCard outbound={trip.outbound} inbound={trip.inbound}/></div>
       {open.length > 0 && <Link href="/vote" className="card mt-3 flex items-center gap-3 p-4 transition-transform active:scale-[.99]" aria-label="ไปหน้าโหวต">
