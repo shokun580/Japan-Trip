@@ -267,9 +267,9 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
    the top corner, a faint compass behind, a big time and an accent pill. */
 .hero { position: relative; overflow: hidden; border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 20%, var(--card)), var(--card) 62%); }
 .hero-mark { position: absolute; right: -22px; bottom: -26px; width: 150px; height: 150px; color: var(--accent); opacity: .08; pointer-events: none; }
-.hero-time { font-size: 2.1rem; line-height: 1; font-weight: 700; letter-spacing: -.02em; color: var(--accent); font-variant-numeric: tabular-nums; }
-.hero-number { font-size: 3.4rem; line-height: .9; font-weight: 700; letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
-.hero-pill { flex: 0 0 auto; margin-top: 4px; padding: 6px 12px; border-radius: 999px; background: var(--accent); color: var(--snow); font-size: .8rem; font-weight: 600; white-space: nowrap; box-shadow: 0 6px 16px var(--accent-ring); }
+.hero-time { font-size: 1.75rem; line-height: 1; font-weight: 700; letter-spacing: -.02em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.hero-number { font-size: 2.9rem; line-height: .9; font-weight: 700; letter-spacing: -.03em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.hero-pill { flex: 0 0 auto; padding: 5px 11px; border-radius: 999px; background: var(--accent); color: var(--snow); font-size: .8rem; font-weight: 600; white-space: nowrap; box-shadow: 0 6px 16px var(--accent-ring); }
 /* On a phone the home page is laid out to the screen: it never scrolls, the "next
    up" card takes the height the other cards leave, and a whole day's list scrolls
    inside that card. A screen too short to hold it all falls back to scrolling. */
@@ -290,10 +290,12 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
   .home .hero > * { flex-shrink: 0; }
   .hero-extra, .hero-extra-xl { display: none; }
   .hero-upcoming li:nth-child(n + 3) { display: none; }
-  .hero-desc { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
-  /* 956px is a Pro Max; the card holds the description and two lines there. */
-  @media (min-height: 950px) { .hero-extra { display: block; } .hero-extra.hero-desc { display: -webkit-box; } }
-  @media (min-height: 1050px) { .hero-extra-xl { display: block; } .hero-desc { -webkit-line-clamp: 2; } .hero-upcoming li:nth-child(n + 3) { display: flex; } }
+  .hero-desc { overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+  /* An iPhone 12 (844px) holds the description; a Plus or Pro Max adds what
+     follows; taller still adds what is on now and more of the day. */
+  @media (min-height: 820px) { .hero-extra.hero-desc { display: -webkit-box; } }
+  @media (min-height: 880px) { .hero-extra { display: block; } .hero-extra.hero-desc { display: -webkit-box; } }
+  @media (min-height: 970px) { .hero-extra-xl { display: block; } .hero-desc { -webkit-line-clamp: 2; } .hero-upcoming li:nth-child(n + 3) { display: flex; } }
 }
 @media (max-width: 700px) and (min-height: 780px) { .home { height: 100dvh; overflow: hidden; padding-bottom: calc(90px + env(safe-area-inset-bottom)); } .home .flight-card { padding: 13px 16px; } }
 /* The red dot: something new waits behind this icon. */

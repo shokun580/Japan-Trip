@@ -26,6 +26,17 @@ async function run(work: (person: string) => Promise<void>): Promise<ActionResul
   }
 }
 
+// How many open polls this person has not voted in yet — the bar's red dot.
+export async function waitingPolls(): Promise<number> {
+  if (!process.env.DATABASE_URL) return 0;
+  const person = await currentPerson();
+  if (!person) return 0;
+  try {
+    const open = await db.poll.findMany({ where: { closedAt: null }, select: { votes: { where: { person }, select: { person: true } } } });
+    return open.filter((p) => p.votes.length === 0).length;
+  } catch { return 0; }
+}
+
 export async function createPoll(formData: FormData) {
   return run(async (person) => {
     const data = z.object({

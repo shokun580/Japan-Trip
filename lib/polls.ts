@@ -15,11 +15,3 @@ export async function getPolls(person: string): Promise<PollData[]> {
     voted: poll.votes.length,
   }));
 }
-
-// What the home page shows on its poll card: how many are open, and how many of
-// those still wait for this person's vote.
-export async function pollSummary(person: string) {
-  const polls = await getPolls(person);
-  const open = polls.filter((p) => !p.closedAt);
-  return { open: open.length, waiting: open.filter((p) => !p.myVote).length };
-}

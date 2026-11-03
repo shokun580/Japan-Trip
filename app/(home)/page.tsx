@@ -1,7 +1,6 @@
 import { getStay, getTrip } from "@/lib/data";
 import { signedInPerson } from "@/lib/session";
 import { Dashboard } from "@/components/dashboard";
-import { getPolls } from "@/lib/polls";
 import { getForecast } from "@/lib/weather";
 import { getYenRate } from "@/lib/rates";
 import { readTokyoNow } from "@/lib/format";
@@ -9,6 +8,6 @@ import { readTokyoNow } from "@/lib/format";
 export const dynamic = "force-dynamic";
 export default async function Home() {
   const [person, trip] = await Promise.all([signedInPerson(), getTrip()]);
-  const [stay, polls, forecast, rate] = await Promise.all([getStay(person, trip), getPolls(person), getForecast(trip.days), getYenRate()]);
-  return <Dashboard trip={trip} person={person} stay={stay} polls={polls} forecast={forecast} rate={rate} today={readTokyoNow().date} />;
+  const [stay, forecast, rate] = await Promise.all([getStay(person, trip), getForecast(trip.days), getYenRate()]);
+  return <Dashboard trip={trip} person={person} stay={stay} forecast={forecast} rate={rate} today={readTokyoNow().date} />;
 }

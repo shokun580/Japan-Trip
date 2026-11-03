@@ -44,7 +44,7 @@ export function NextUp({ trip }: { trip: TripData }) {
   if (!today) {
     const first = trip.days[0];
     const after = now.date > trip.endDate;
-    return <section className="card hero flex flex-col p-4 sm:p-5" aria-label="ถัดไป">
+    return <section className="card hero flex flex-col px-4 pt-3 pb-3 sm:p-5" aria-label="ถัดไป">
       <Compass className="hero-mark" aria-hidden/>
       <Link href="/plan" className="flex items-center justify-between gap-3">
         <p className="eyebrow">ถัดไป · {after ? "จบทริปแล้ว" : "ก่อนออกเดินทาง"}</p>
@@ -52,7 +52,7 @@ export function NextUp({ trip }: { trip: TripData }) {
       </Link>
       {after
         ? <h2 className="mt-3 text-[1.35rem] leading-snug font-bold">กลับถึงบ้านแล้ว เก็บความทรงจำดีๆ ไว้นะ</h2>
-        : <div className="mt-2 flex items-end gap-2">
+        : <div className="mt-1 flex items-end gap-2">
             <span className="hero-number">{daysUntil}</span>
             <span className="pb-2 text-[1.1rem] leading-tight font-semibold">{daysUntil === 1 ? "วัน · พรุ่งนี้ออกเดินทาง" : "วัน"}<span className="block text-[.85rem] font-normal text-[var(--muted)]">ถึงวันออกเดินทาง</span></span>
           </div>}
@@ -68,7 +68,7 @@ export function NextUp({ trip }: { trip: TripData }) {
   const tomorrow = trip.days[trip.days.indexOf(today) + 1];
   const map = next?.kind === "activity" ? next.activity.mapUrl : null;
 
-  return <section className="card hero flex flex-col p-4 sm:p-5" aria-label="ถัดไป">
+  return <section className="card hero flex flex-col px-4 pt-3 pb-3 sm:p-5" aria-label="ถัดไป">
     <Compass className="hero-mark" aria-hidden/>
     <Link href={`/plan?day=${today.id}`} className="flex items-center justify-between gap-3">
       <p className="eyebrow truncate">ถัดไป · Day {trip.days.indexOf(today) + 1} · {today.title}</p>
@@ -77,13 +77,11 @@ export function NextUp({ trip }: { trip: TripData }) {
 
     {next
       ? <>
-          <div className="mt-2 flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="hero-time">{next.time}</p>
-              <h2 className="line-clamp-2 text-[1.2rem] leading-snug font-bold">{title(next)}</h2>
-            </div>
+          <div className="mt-1 flex items-center justify-between gap-3">
+            <p className="hero-time">{next.time}</p>
             <span className="hero-pill">{untilLabel(toMinutes(next.time) - now.minutes)}</span>
           </div>
+          <h2 className="mt-0.5 truncate text-[1.1rem] leading-snug font-bold">{title(next)}</h2>
           {next.kind === "activity" && next.activity.description && <p className="hero-extra hero-desc mt-1 text-[.9rem] text-[var(--muted)]">{next.activity.description}</p>}
           {current && <p className="hero-extra-xl mt-1.5 text-[.85rem] text-[var(--muted)]">ตอนนี้ · <span className="tabular-nums">{current.time}</span> {title(current)}</p>}
           {map && <a href={map} target="_blank" rel="noopener noreferrer" className="tap mt-2 inline-flex items-center gap-2 rounded-xl bg-[var(--ink)] px-4 text-[.9rem] font-medium text-[var(--on-dark)]"><MapPinned size={18}/>เปิดแผนที่</a>}

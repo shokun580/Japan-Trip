@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ChevronRight, Vote } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { PersonKey } from "@/lib/people";
-import type { PollData, StayData, TripData } from "@/lib/types";
+import type { StayData, TripData } from "@/lib/types";
 import type { ForecastByDate } from "@/lib/weather";
 import type { YenRate } from "@/lib/rates";
 import { OWNER } from "@/lib/people";
@@ -15,9 +15,10 @@ import { WeatherStrip } from "./weather";
 import { Money } from "./money";
 
 // The home page: what matters today, top to bottom — the next thing on the plan,
-// the flights, polls, the weather ahead, yen in baht, and the packing list. Every section keeps
-// its place and its label whether or not it has anything to show yet, so the eye
-// learns where each thing lives.
+// the flights, the weather ahead, yen in baht, and the packing list. Every section
+// keeps its place and its label whether or not it has anything to show yet, so the
+// eye learns where each thing lives. Polls live behind their slot in the bar, which
+// shows a dot when one is waiting.
 // A section with nothing in it yet keeps its card, so the layout holds still.
 function Empty({ label, text, href }: { label: string; text: string; href?: string }) {
   const body = <><span className="min-w-0 flex-1"><span className="eyebrow block">{label}</span><span className="block truncate text-[.92rem] text-[var(--muted)]">{text}</span></span>{href && <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>}</>;
@@ -26,9 +27,7 @@ function Empty({ label, text, href }: { label: string; text: string; href?: stri
     : <div className="card flex items-center gap-3 border-dashed px-4 py-3">{body}</div>;
 }
 
-export function Dashboard({ trip, person, stay, polls, forecast, rate, today }: { trip: TripData; person: PersonKey; stay: StayData | null; polls: PollData[]; forecast: ForecastByDate; rate: YenRate | null; today: string }) {
-  const open = polls.filter((p) => !p.closedAt);
-  const waiting = open.filter((p) => !p.myVote);
+export function Dashboard({ trip, person, stay, forecast, rate, today }: { trip: TripData; person: PersonKey; stay: StayData | null; forecast: ForecastByDate; rate: YenRate | null; today: string }) {
   const dates = `${shortThaiDate(trip.startDate)} – ${shortThaiDate(trip.endDate)}`;
   const hasFlights = [trip.outbound, trip.inbound].some((f) => f.date && f.takeoffTime);
 
@@ -41,14 +40,6 @@ export function Dashboard({ trip, person, stay, polls, forecast, rate, today }: 
       <div className="mt-2.5">{hasFlights
         ? <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
         : <Empty label="เที่ยวบิน" text="ยังไม่ได้ตั้งเวลาเที่ยวบิน" href={person === OWNER ? "/manage/flight" : undefined}/>}</div>
-      <Link href="/vote" className="card mt-2.5 flex items-center gap-3 px-4 py-2.5 transition-transform active:scale-[.99]" aria-label="ไปหน้าโหวต">
-        <span className="flight-icon" data-tone={waiting.length ? "accent" : undefined}><Vote size={20}/></span>
-        <span className="min-w-0 flex-1">
-          <span className="eyebrow block">โหวต</span>
-          <span className="block truncate text-[.92rem] font-medium">{waiting.length ? `${waiting.length} โหวตรอคุณอยู่ · ${waiting[0].question}` : open.length ? `${open.length} โหวตเปิดอยู่ · ${open[0].question}` : "ยังไม่มีโหวตที่เปิดอยู่"}</span>
-        </span>
-        <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
-      </Link>
       <WeatherStrip days={trip.days} forecast={forecast} today={today}/>
       <div className="mt-2.5"><Money rate={rate}/></div>
       <div className="mt-2.5"><ChecklistButton person={person}/></div>
