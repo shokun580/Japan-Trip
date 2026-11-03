@@ -7,6 +7,7 @@ import { OWNER } from "@/lib/people";
 import { signedInPerson } from "@/lib/session";
 import { shortThaiDate } from "@/lib/format";
 import { BottomNav } from "@/components/bottom-nav";
+import { ChangelogRead } from "@/components/changelog-read";
 
 export const metadata: Metadata = { title: "มีอะไรใหม่" };
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ export default async function ChangelogPage() {
   const [person, trip] = await Promise.all([signedInPerson(), getTrip()]);
   const stay = await getStay(person, trip);
   return <main className="shell">
+    <ChangelogRead/>
     <div className="page-enter">
       <Link href="/settings" className="tap -ml-2 inline-flex items-center gap-1 rounded-xl px-2 font-medium text-[var(--ink)]"><ChevronLeft size={22}/>ตั้งค่า</Link>
       <p className="eyebrow mt-4">Patch notes</p>

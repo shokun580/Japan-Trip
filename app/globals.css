@@ -276,13 +276,18 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 @media (max-width: 700px) {
   .home { display: flex; flex-direction: column; min-height: 100dvh; }
   .home > .page-enter { display: flex; flex: 1; flex-direction: column; min-height: 0; }
-  /* Cards keep their own height; whatever is left over goes between them. Only the
-     "next up" card may give way on a screen that cannot hold everything. */
-  .home > .page-enter { justify-content: space-between; }
+  /* The cards keep their gaps; the "next up" card takes whatever height is left and
+     pins its list of what follows to its bottom edge, so a tall screen shows more
+     of the day instead of air between cards. It is also the one card allowed to
+     give way on a screen that cannot hold everything. */
   .home > .page-enter > * { flex-shrink: 0; }
-  .home > .page-enter > .hero { flex-shrink: 1; min-height: 150px; }
+  .home > .page-enter > .hero { flex: 1 1 auto; min-height: 150px; }
+  .hero-upcoming li:nth-child(n + 3) { display: none; }
+  @media (min-height: 900px) { .hero-upcoming li:nth-child(n + 3) { display: flex; } }
 }
 @media (max-width: 700px) and (min-height: 780px) { .home { height: 100dvh; overflow: hidden; padding-bottom: calc(90px + env(safe-area-inset-bottom)); } .home .flight-card { padding: 13px 16px; } }
+/* The red dot: something new waits behind this icon. */
+.unread-dot { position: absolute; top: -3px; right: -4px; width: 9px; height: 9px; border: 2px solid var(--card); border-radius: 999px; background: var(--accent); box-sizing: content-box; animation: nav-pop .45s cubic-bezier(.34, 1.56, .64, 1) backwards; }
 /* Polls (components/poll-board.tsx) ------------------------------------------- */
 /* The share of votes is a bar painted behind the row; the row itself stays a button
    so a tap anywhere on it is a vote. */

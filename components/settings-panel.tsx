@@ -4,6 +4,7 @@ import { ChevronRight, Palette, Sparkles, UserRound } from "lucide-react";
 import { useState } from "react";
 import { OWNER, personName, personOf, type PersonKey } from "@/lib/people";
 import { APP_VERSION } from "@/lib/changelog";
+import { useUnreadChangelog } from "@/lib/changelog-seen";
 import { manageSections } from "./manage-tabs";
 import { ThemePicker } from "./theme-picker";
 
@@ -12,6 +13,7 @@ import { ThemePicker } from "./theme-picker";
 export function SettingsPanel({ person }: { person: PersonKey }) {
   const [themes, setThemes] = useState(false);
   const me = personOf(person);
+  const unread = useUnreadChangelog();
   const row = "tap flex w-full items-center gap-3 rounded-2xl px-4 text-left hover:bg-[var(--sky)]";
 
   return <>
@@ -41,8 +43,8 @@ export function SettingsPanel({ person }: { person: PersonKey }) {
 
     <section className="card mt-5 p-2" aria-label="เวอร์ชัน">
       <Link href="/settings/changelog" className={row}>
-        <span className="flight-icon"><Sparkles size={20}/></span>
-        <span className="min-w-0 flex-1"><span className="block font-medium">เวอร์ชัน {APP_VERSION}</span><span className="block text-[.78rem] text-[var(--muted)]">ดูว่ามีอะไรใหม่ และเวอร์ชันก่อนหน้า</span></span>
+        <span className="relative flight-icon"><Sparkles size={20}/>{unread && <span className="unread-dot" aria-hidden/>}</span>
+        <span className="min-w-0 flex-1"><span className="block font-medium">เวอร์ชัน {APP_VERSION}{unread && <span className="ml-2 rounded-full bg-[var(--accent)] px-2 py-0.5 text-[.68rem] font-medium text-[var(--snow)]">ใหม่</span>}</span><span className="block text-[.78rem] text-[var(--muted)]">{unread ? "มีอะไรใหม่ที่คุณยังไม่ได้อ่าน" : "ดูว่ามีอะไรใหม่ และเวอร์ชันก่อนหน้า"}</span></span>
         <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
       </Link>
     </section>
