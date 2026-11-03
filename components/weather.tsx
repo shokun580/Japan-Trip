@@ -29,8 +29,8 @@ export function WeatherLine({ forecast }: { forecast: Forecast | undefined }) {
 // Days past the forecast's reach are simply not there yet.
 export function WeatherStrip({ days, forecast, today }: { days: DayData[]; forecast: ForecastByDate; today: string }) {
   const shown = days.filter((d) => d.date >= today && forecast[d.date]);
-  if (!shown.length) return <div className="card mt-3 flex items-center gap-3 border-dashed px-4 py-3"><span className="min-w-0 flex-1"><span className="eyebrow block">อากาศ</span><span className="block truncate text-[.92rem] text-[var(--muted)]">ยังไม่มีพยากรณ์สำหรับวันเดินทาง</span></span></div>;
-  return <section className="card mt-2.5 px-4 pt-2 pb-2" aria-label="พยากรณ์อากาศ">
+  if (!shown.length) return <div className="card flex items-center gap-3 border-dashed px-4 py-3"><span className="min-w-0 flex-1"><span className="eyebrow block">อากาศ</span><span className="block truncate text-[.92rem] text-[var(--muted)]">ยังไม่มีพยากรณ์สำหรับวันเดินทาง</span></span></div>;
+  return <section className="card px-4 pt-2 pb-2" aria-label="พยากรณ์อากาศ">
     <div className="flex items-baseline justify-between"><p className="eyebrow">อากาศ</p><p className="text-[.72rem] text-[var(--muted)]">ตามเมืองของแต่ละวัน</p></div>
     <ul className="slider mt-2 -mx-1 flex gap-2 px-1">{shown.map((d) => {
       const f = forecast[d.date], { label, Icon } = describe(f.code);

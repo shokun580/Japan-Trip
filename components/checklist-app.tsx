@@ -10,6 +10,7 @@ import { addCategory, addItem, clearChecks, loadChecklist, removeCategory, remov
 import { Field } from "./field";
 import { BottomNav } from "./bottom-nav";
 import type { NavData } from "@/lib/nav";
+import { reach } from "@/lib/reach";
 
 const countOf = (categories: PackingCategoryData[]) => {
   const items = categories.flatMap((c) => c.items);
@@ -72,7 +73,7 @@ export function ChecklistApp({ person, nav }: { person: PersonKey; nav: NavData 
   async function commit(next: PackingCategoryData[], work: () => Promise<{ ok: true } | { ok: false; message: string } | { ok: true; id: string }>, after?: (id: string) => void) {
     const before = categories ?? [];
     setCategories(next);
-    const result = await work();
+    const result = await reach(work());
     if (!result.ok) { setCategories(before); alertError(result.message); return; }
     if (after && "id" in result) after(result.id);
   }
@@ -141,7 +142,7 @@ export function ChecklistApp({ person, nav }: { person: PersonKey; nav: NavData 
     }
     if (choice === "deny") {
       if (!(await confirmAction("คืนค่าลิสต์ตั้งต้น?", "หมวดหมู่และของที่เพิ่มเองทั้งหมดจะถูกลบ แล้วแทนที่ด้วยลิสต์เริ่มต้น", "คืนค่า"))) return;
-      const result = await resetChecklist(person);
+      const result = await reach(resetChecklist(person));
       if (!result.ok) { alertError(result.message); return; }
       setCategories(result.categories); setAllOpen([]);
     }

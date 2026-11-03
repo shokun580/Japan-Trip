@@ -21,7 +21,15 @@ export const themes: Theme[] = [
 export const DEFAULT_THEME = themes[0];
 export const themeOf = (key: string | null | undefined) => themes.find((t) => t.key === key) ?? DEFAULT_THEME;
 
+// The CSS for <html> when the server already knows the person's theme, so the
+// first paint is in their colours on any phone, before any script runs.
+export function themeStyle(theme: Theme): Record<string, string> {
+  return { ...Object.fromEntries(ROLE_LIST.map((role) => [`--${role}`, theme[role]])), colorScheme: theme.dark ? "dark" : "light" };
+}
+
 // One key per person on this phone, so two people sharing it each keep their own.
+// It is a copy of the choice saved in the database, for the moments the database
+// cannot answer: offline, or before a choice was ever saved.
 export const themeStorageKey = (person: string) => `japan-trip.theme.${person}`;
 
 export function readThemeKey(person: string) {
@@ -32,6 +40,7 @@ export function writeThemeKey(person: string, key: string) {
 }
 
 const ROLES = ["ink", "slate", "sky", "snow", "accent", "paper", "deep"] as const;
+const ROLE_LIST = ROLES;
 
 // Writes the roles straight onto <html>, where the :root values of globals.css are
 // overridden; the status bar follows the page background through theme-color.
@@ -45,7 +54,10 @@ export function applyTheme(theme: Theme) {
 
 // The same, as a script the layout inlines before anything paints, so a themed
 // phone never flashes the default colours on load. Kept in step with applyTheme.
+// When the server has already drawn the saved theme (data-theme on <html>), that
+// wins and is copied to the phone; otherwise the phone's own copy is used.
 export function themeBootScript(person: string | null) {
   const table = JSON.stringify(themes.map((t) => [t.key, t.dark ? 1 : 0, ...ROLES.map((r) => t[r])]));
-  return `(function(){try{var k=localStorage.getItem(${JSON.stringify(themeStorageKey(person ?? ""))});if(!k)return;var t=${table}.find(function(x){return x[0]===k});if(!t)return;var r=document.documentElement,n=${JSON.stringify(ROLES)};for(var i=0;i<n.length;i++)r.style.setProperty("--"+n[i],t[i+2]);r.dataset.theme=k;r.style.colorScheme=t[1]?"dark":"light";var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t[7]);}catch(e){}})()`;
+  const key = JSON.stringify(themeStorageKey(person ?? ""));
+  return `(function(){try{var s=document.documentElement.dataset.theme;if(s){localStorage.setItem(${key},s);return;}var k=localStorage.getItem(${key});if(!k)return;var t=${table}.find(function(x){return x[0]===k});if(!t)return;var r=document.documentElement,n=${JSON.stringify(ROLES)};for(var i=0;i<n.length;i++)r.style.setProperty("--"+n[i],t[i+2]);r.dataset.theme=k;r.style.colorScheme=t[1]?"dark":"light";var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t[7]);}catch(e){}})()`;
 }

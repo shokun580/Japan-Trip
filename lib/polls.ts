@@ -6,7 +6,9 @@ import type { PollData } from "./types";
 // database there are no polls, and the page says so.
 export async function getPolls(person: string): Promise<PollData[]> {
   if (!process.env.DATABASE_URL) return [];
-  const rows = await db.poll.findMany({ orderBy: { createdAt: "desc" }, include: { options: { orderBy: { sortOrder: "asc" } }, votes: true } });
+  // Before `db:push` has added the poll tables the page shows no polls rather than
+  // an error; creating one then says what is missing.
+  const rows = await db.poll.findMany({ orderBy: { createdAt: "desc" }, include: { options: { orderBy: { sortOrder: "asc" } }, votes: true } }).catch(() => []);
   return rows.map((poll) => ({
     id: poll.id, question: poll.question, createdBy: poll.createdBy,
     createdAt: poll.createdAt.toISOString(), closedAt: poll.closedAt?.toISOString() ?? null,

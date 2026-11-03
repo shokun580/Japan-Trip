@@ -13,6 +13,7 @@ import { FlightCard } from "./flight-card";
 import { NextUp } from "./next-up";
 import { WeatherStrip } from "./weather";
 import { Money } from "./money";
+import type { HomeSection } from "@/lib/home-layout";
 
 // The home page: what matters today, top to bottom — the next thing on the plan,
 // the flights, the weather ahead, yen in baht, and the packing list. Every section
@@ -27,22 +28,26 @@ function Empty({ label, text, href }: { label: string; text: string; href?: stri
     : <div className="card flex items-center gap-3 border-dashed px-4 py-3">{body}</div>;
 }
 
-export function Dashboard({ trip, person, stay, forecast, rate, today }: { trip: TripData; person: PersonKey; stay: StayData | null; forecast: ForecastByDate; rate: YenRate | null; today: string }) {
+export function Dashboard({ trip, person, stay, forecast, rate, today, order }: { trip: TripData; person: PersonKey; stay: StayData | null; forecast: ForecastByDate; rate: YenRate | null; today: string; order: HomeSection[] }) {
   const dates = `${shortThaiDate(trip.startDate)} – ${shortThaiDate(trip.endDate)}`;
   const hasFlights = [trip.outbound, trip.inbound].some((f) => f.date && f.takeoffTime);
+  const sections: Record<HomeSection, React.ReactNode> = {
+    next: <NextUp key="next" trip={trip}/>,
+    flights: hasFlights
+      ? <FlightCard key="flights" outbound={trip.outbound} inbound={trip.inbound}/>
+      : <Empty key="flights" label="เที่ยวบิน" text="ยังไม่ได้ตั้งเวลาเที่ยวบิน" href={person === OWNER ? "/manage/flight" : undefined}/>,
+    weather: <WeatherStrip key="weather" days={trip.days} forecast={forecast} today={today}/>,
+    money: <Money key="money" rate={rate}/>,
+    checklist: <ChecklistButton key="checklist" person={person}/>,
+  };
 
   // On a phone the page is laid out to the screen (see .home in globals.css): no
-  // scrolling, the "next up" card takes whatever height is left.
+  // scrolling, the "next up" card takes whatever height is left. The order is each
+  // person's own, from the settings page.
   return <main className="shell home">
-    <div className="page-enter">
+    <div className="page-enter flex flex-col gap-2.5">
       <AppHeader name={trip.name} dates={dates} compact/>
-      <NextUp trip={trip}/>
-      <div className="mt-2.5">{hasFlights
-        ? <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
-        : <Empty label="เที่ยวบิน" text="ยังไม่ได้ตั้งเวลาเที่ยวบิน" href={person === OWNER ? "/manage/flight" : undefined}/>}</div>
-      <WeatherStrip days={trip.days} forecast={forecast} today={today}/>
-      <div className="mt-2.5"><Money rate={rate}/></div>
-      <div className="mt-2.5"><ChecklistButton person={person}/></div>
+      {order.map((key) => sections[key])}
     </div>
     <BottomNav mapUrl={stay?.mapUrl ?? null} name={stay?.name} canManage={person === OWNER}/>
   </main>;

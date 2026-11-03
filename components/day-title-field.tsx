@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { saveDayTitle } from "@/app/actions";
 import { alertError } from "@/lib/alerts";
 import { Field } from "./field";
+import { reach } from "@/lib/reach";
 
 export function DayTitleField({ dayId, title }: { dayId: string; title: string }) {
   const [value, setValue] = useState(title);
@@ -31,7 +32,7 @@ export function DayTitleField({ dayId, title }: { dayId: string; title: string }
       const formData = new FormData();
       formData.set("dayId", dayId);
       formData.set("title", next);
-      const result = await saveDayTitle(formData);
+      const result = await reach(saveDayTitle(formData));
       if (result.ok) { saved.current = next; setState("saved"); } else { setState("idle"); alertError(result.message); }
     }, 700);
     return () => window.clearTimeout(timer);

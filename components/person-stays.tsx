@@ -1,5 +1,5 @@
 "use client";
-import { MapPin, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { PersonStayData } from "@/lib/types";
 import { people, personName, personOf } from "@/lib/people";
@@ -7,16 +7,12 @@ import { deletePersonStay, savePersonStay } from "@/app/actions";
 import { alertError, confirmAction, toastSuccess } from "@/lib/alerts";
 import { AlertForm } from "./alert-form";
 import { Field } from "./field";
+import { reach } from "@/lib/reach";
 
 function StayFields({ stay, disabled }: { stay?: PersonStayData; disabled: boolean }) {
   return <>
     <label className="label">ชื่อที่พัก<Field name="name" required defaultValue={stay?.name ?? ""} disabled={disabled}/></label>
-    <label className="label">ลิงก์แผนที่
-      <div className="relative">
-        <MapPin className="pointer-events-none absolute top-3.5 left-3 text-[var(--muted)]" size={20}/>
-        <Field className="field-icon" type="url" name="mapUrl" placeholder="https://maps.google.com/…" defaultValue={stay?.mapUrl ?? ""} disabled={disabled}/>
-      </div>
-    </label>
+    <label className="label">ลิงก์แผนที่<Field type="url" name="mapUrl" placeholder="https://maps.google.com/…" defaultValue={stay?.mapUrl ?? ""} disabled={disabled}/></label>
   </>;
 }
 
@@ -27,7 +23,7 @@ export function PersonStays({ stays, readOnly }: { stays: PersonStayData[]; read
   async function remove(stay: PersonStayData) {
     if (!(await confirmAction(`ให้${personName(stay.person)}ใช้ที่พักหลัก?`, `${stay.name} จะถูกเอาออกจากคนนี้`, "เอาออก"))) return;
     setRemoving(stay.person);
-    const result = await deletePersonStay(stay.person);
+    const result = await reach(deletePersonStay(stay.person));
     setRemoving(null);
     if (result.ok) toastSuccess("กลับไปใช้ที่พักหลักแล้ว"); else alertError(result.message);
   }

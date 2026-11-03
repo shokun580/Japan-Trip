@@ -9,6 +9,7 @@ import { durationLabel, swapEntries, type TimelineEntry } from "@/lib/timeline";
 import { dayLabel } from "@/lib/format";
 import { useDragSwap } from "@/lib/use-drag-swap";
 import { Field, TextArea } from "./field";
+import { reach } from "@/lib/reach";
 
 export function ActivityEditor({ day, days, entries }: { day: DayData; days: DayData[]; entries: TimelineEntry[] }) {
   const [editing, setEditing] = useState<ActivityData | "new" | null>(null);
@@ -27,7 +28,7 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
 
   const remove = async (activity: ActivityData) => {
     if (!(await confirmDelete(activity.name))) return;
-    setBusy(true); const result = await deleteActivity(activity.id); setBusy(false);
+    setBusy(true); const result = await reach(deleteActivity(activity.id)); setBusy(false);
     report(result, "ลบกิจกรรมแล้ว");
   };
 
@@ -35,7 +36,7 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
   const [shown, swapShown] = useOptimistic(entries, (current, [from, to]: [string, string]) => swapEntries(current, from, to));
   const swap = (from: string, to: string) => startTransition(async () => {
     swapShown([from, to]);
-    report(await swapActivities(from, to), "สลับเวลาแล้ว");
+    report(await reach(swapActivities(from, to)), "สลับเวลาแล้ว");
   });
   const { list, lifted, over, row, keys } = useDragSwap(shown.map((e) => `${e.id}@${e.time}`).join(), swap);
   const activities = shown.flatMap((e) => (e.kind === "activity" ? [e.activity] : []));
@@ -93,7 +94,7 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
           <button onClick={close} className="tap grid place-items-center rounded-full" aria-label="ปิด"><X/></button>
         </div>
         <form action={async (formData) => {
-          setBusy(true); const result = await saveActivity(formData); setBusy(false);
+          setBusy(true); const result = await reach(saveActivity(formData)); setBusy(false);
           const where = dayLabel(target.date);
           const success = editing === "new" ? (moving ? `เพิ่มกิจกรรมใน ${where} แล้ว` : "เพิ่มกิจกรรมแล้ว") : (moving ? `ย้ายไป ${where} แล้ว` : "บันทึกกิจกรรมแล้ว");
           if (report(result, success)) close();

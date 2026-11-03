@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ChevronRight, Palette, Sparkles, UserRound } from "lucide-react";
+import { ChevronRight, LayoutList, Palette, Sparkles, UserRound } from "lucide-react";
 import { useState } from "react";
 import { OWNER, personName, personOf, type PersonKey } from "@/lib/people";
 import { APP_VERSION } from "@/lib/changelog";
@@ -25,9 +25,14 @@ export function SettingsPanel({ person }: { person: PersonKey }) {
       </Link>
       <button type="button" onClick={() => setThemes(true)} className={row}>
         <span className="flight-icon"><Palette size={20}/></span>
-        <span className="min-w-0 flex-1"><span className="block font-medium">ธีมสี</span><span className="block text-[.78rem] text-[var(--muted)]">เปลี่ยนได้เฉพาะเครื่องนี้ของคุณ</span></span>
+        <span className="min-w-0 flex-1"><span className="block font-medium">ธีมสี</span><span className="block text-[.78rem] text-[var(--muted)]">บันทึกไว้กับชื่อคุณ ใช้ได้ทุกเครื่อง</span></span>
         <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
       </button>
+      <Link href="/settings/home" className={row}>
+        <span className="flight-icon"><LayoutList size={20}/></span>
+        <span className="min-w-0 flex-1"><span className="block font-medium">จัดหน้าหลัก</span><span className="block text-[.78rem] text-[var(--muted)]">เรียงลำดับส่วนต่างๆ ตามที่คุณชอบ</span></span>
+        <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
+      </Link>
     </section>
 
     {person === OWNER && <section className="mt-5" aria-label="จัดการแผนเที่ยว">

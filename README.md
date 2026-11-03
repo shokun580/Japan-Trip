@@ -65,6 +65,12 @@ The poll tables are `Poll`, `PollOption` and `PollVote` in `prisma/schema.prisma
 adding this feature means running `npm run db:push` against the production database
 after deploying, or the vote page will report that its tables are missing.
 
+Each person's own choices — the order of the home page's sections (`/settings/home`)
+and their colour theme — are kept in `Preferences` (another table for `db:push`).
+The theme is drawn on the server, so it is right on every phone from the first
+paint; the phone keeps a copy for offline use. Without a row, or without the
+table, everyone gets the defaults from `lib/home-layout.ts` and `lib/themes.ts`.
+
 ## Packing checklist
 
 Each traveller in `lib/people.ts` gets their own checklist, stored in the database.

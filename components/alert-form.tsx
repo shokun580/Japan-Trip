@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { ActionResult } from "@/lib/types";
 import { alertError, toastSuccess } from "@/lib/alerts";
+import { reach } from "@/lib/reach";
 
 export function AlertForm({ action, successText, submitText, disabled, className, children }: {
   action: (formData: FormData) => Promise<ActionResult>;
@@ -10,7 +11,7 @@ export function AlertForm({ action, successText, submitText, disabled, className
   const [saving, setSaving] = useState(false);
   return <form className={className} action={async (formData) => {
     setSaving(true);
-    const result = await action(formData);
+    const result = await reach(action(formData));
     setSaving(false);
     if (result.ok) toastSuccess(successText); else alertError(result.message);
   }}>

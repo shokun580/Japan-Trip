@@ -8,6 +8,7 @@ import { dayLabel } from "@/lib/format";
 import { shiftedTimes, toMinutes } from "@/lib/timeline";
 import { useTokyoNow } from "@/lib/use-tokyo-now";
 import { Field } from "./field";
+import { reach } from "@/lib/reach";
 
 const PRESETS = [-30, -15, 15, 30, 45, 60, 90];
 const amountLabel = (minutes: number) => `${minutes > 0 ? "+" : "−"}${Math.abs(minutes)} นาที`;
@@ -42,7 +43,7 @@ export function DayShift({ day, compact = false }: { day: DayData; compact?: boo
 
   const apply = async () => {
     if (!fromId || !shift?.ok) return;
-    setBusy(true); const result = await shiftActivities(day.id, fromId, minutes); setBusy(false);
+    setBusy(true); const result = await reach(shiftActivities(day.id, fromId, minutes)); setBusy(false);
     if (!result.ok) { alertError(result.message); return; }
     toastSuccess(`เลื่อน ${shift.moved.length} กิจกรรมไป ${amountLabel(minutes)} แล้ว`);
     close();

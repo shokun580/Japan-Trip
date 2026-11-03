@@ -11,6 +11,7 @@ import { Field } from "./field";
 import { DecideTabs } from "./decide-tabs";
 import { BottomNav } from "./bottom-nav";
 import type { NavData } from "@/lib/nav";
+import { reach } from "@/lib/reach";
 
 const REFRESH_MS = 20_000;
 const timeLabel = (iso: string) => new Date(iso).toLocaleString("th-TH", { timeZone: "Asia/Tokyo", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -77,12 +78,12 @@ function PollCard({ poll, person }: { poll: PollData; person: string }) {
     if (closed || optionId === shown.myVote) return;
     startTransition(async () => {
       showVote(optionId);
-      const result = await castVote(poll.id, optionId);
+      const result = await reach(castVote(poll.id, optionId));
       if (!result.ok) alertError(result.message);
     });
   };
   const act = async (label: string, work: () => Promise<{ ok: boolean; message?: string }>) => {
-    setBusy(true); const result = await work(); setBusy(false);
+    setBusy(true); const result = await reach(work()); setBusy(false);
     if (result.ok) toastSuccess(label); else alertError("message" in result && result.message ? result.message : "ไม่สำเร็จ");
   };
   const remove = async () => {
@@ -158,7 +159,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
         <button onClick={close} className="tap grid place-items-center rounded-full" aria-label="ปิด"><X/></button>
       </div>
       <form action={async (formData) => {
-        setBusy(true); const result = await createPoll(formData); setBusy(false);
+        setBusy(true); const result = await reach(createPoll(formData)); setBusy(false);
         if (!result.ok) { alertError(result.message); return; }
         toastSuccess("ตั้งโหวตแล้ว"); close();
       }} className="mt-5 grid gap-4">

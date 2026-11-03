@@ -7,7 +7,10 @@ import { useEffect, useSyncExternalStore } from "react";
 // live one. Only a production build registers it: in development the worker would
 // hand out stale chunks while the code is still changing.
 
-const WARM = ["/", "/plan", "/flights", "/checklist", "/vote", "/settings"];
+// Every page anyone might open on the move, so none has to have been visited
+// before the signal goes. The manage pages are left out: changing the trip needs
+// the network anyway.
+const WARM = ["/", "/plan", "/flights", "/checklist", "/vote", "/wheel", "/settings", "/settings/home", "/settings/changelog"];
 
 function subscribe(listener: () => void) {
   window.addEventListener("online", listener);

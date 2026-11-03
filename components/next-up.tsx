@@ -13,15 +13,14 @@ const untilLabel = (minutes: number) => {
 };
 const title = (entry: TimelineEntry) => (entry.kind === "flight" ? entry.label : entry.activity.name);
 
-// What follows, so the card fills its place with something useful. Up to four
-// lines are rendered; a short screen shows none, a tall one all (see .hero-extra
-// in globals.css).
-const UPCOMING = 4;
+// The next two things after it, so the card says where the day goes from here
+// (one on a short screen, where the converter needs the room).
+const UPCOMING = 2;
 function Upcoming({ label, entries }: { label: string; entries: TimelineEntry[] }) {
   if (!entries.length) return null;
-  return <div className="hero-upcoming hero-extra mt-auto border-t border-[var(--line)] pt-1.5">
+  return <div className="mt-2.5 border-t border-[var(--line)] pt-1.5">
     <p className="text-[.72rem] font-medium tracking-[.1em] text-[var(--muted)] uppercase">{label}</p>
-    <ul className="mt-1 grid gap-1">{entries.map((e) => <li key={e.id} className="flex min-w-0 gap-2.5 text-[.9rem]">
+    <ul className="hero-next mt-1 grid gap-1">{entries.map((e) => <li key={e.id} className="flex min-w-0 gap-2.5 text-[.9rem]">
       <span className="shrink-0 font-semibold tabular-nums">{e.time}</span>
       <span className="min-w-0 truncate">{title(e)}</span>
     </li>)}</ul>
@@ -31,7 +30,7 @@ function Upcoming({ label, entries }: { label: string; entries: TimelineEntry[] 
 // The first thing on the home page: where the day stands right now. What comes
 // next and in how long, what follows it, and the way to the full plan. Before the
 // trip it counts the days down over the first day's plan; after it, it says goodbye.
-// Its height does not depend on the clock: nothing on the page moves as time passes.
+// It keeps its own height — the converter below takes whatever room is left.
 export function NextUp({ trip }: { trip: TripData }) {
   const now = useTokyoNow();
 
@@ -56,13 +55,11 @@ export function NextUp({ trip }: { trip: TripData }) {
             <span className="hero-number">{daysUntil}</span>
             <span className="pb-2 text-[1.1rem] leading-tight font-semibold">{daysUntil === 1 ? "วัน · พรุ่งนี้ออกเดินทาง" : "วัน"}<span className="block text-[.85rem] font-normal text-[var(--muted)]">ถึงวันออกเดินทาง</span></span>
           </div>}
-      {!after && first && <div className="h-2"/>}
       {!after && first && <Upcoming label={`วันแรก · ${dayLabel(first.date)} ${first.title}`} entries={dayEntries(trip, first).slice(0, UPCOMING)}/>}
     </section>;
   }
 
   const entries = dayEntries(trip, today);
-  const current = [...entries].reverse().find((e) => toMinutes(e.time) <= now.minutes);
   const next = entries.find((e) => toMinutes(e.time) > now.minutes);
   const following = next ? entries.slice(entries.indexOf(next) + 1, entries.indexOf(next) + 1 + UPCOMING) : [];
   const tomorrow = trip.days[trip.days.indexOf(today) + 1];
@@ -82,15 +79,11 @@ export function NextUp({ trip }: { trip: TripData }) {
             <span className="hero-pill">{untilLabel(toMinutes(next.time) - now.minutes)}</span>
           </div>
           <h2 className="mt-0.5 truncate text-[1.1rem] leading-snug font-bold">{title(next)}</h2>
-          {next.kind === "activity" && next.activity.description && <p className="hero-extra hero-desc mt-1 text-[.9rem] text-[var(--muted)]">{next.activity.description}</p>}
-          {current && <p className="hero-extra-xl mt-1.5 text-[.85rem] text-[var(--muted)]">ตอนนี้ · <span className="tabular-nums">{current.time}</span> {title(current)}</p>}
           {map && <a href={map} target="_blank" rel="noopener noreferrer" className="tap mt-2 inline-flex items-center gap-2 rounded-xl bg-[var(--ink)] px-4 text-[.9rem] font-medium text-[var(--on-dark)]"><MapPinned size={18}/>เปิดแผนที่</a>}
-          <div className="h-2"/>
           <Upcoming label="ต่อจากนั้น" entries={following}/>
         </>
       : <>
           <h2 className="mt-3 text-[1.35rem] leading-snug font-bold">{entries.length ? "หมดแผนของวันนี้แล้ว พักผ่อนได้เลย" : "วันนี้ยังไม่มีแผน ตามใจเลย"}</h2>
-          {tomorrow && <div className="h-2"/>}
           {tomorrow && <Upcoming label={`พรุ่งนี้ · ${dayLabel(tomorrow.date)} ${tomorrow.title}`} entries={dayEntries(trip, tomorrow).slice(0, UPCOMING)}/>}
         </>}
   </section>;

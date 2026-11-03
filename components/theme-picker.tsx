@@ -2,9 +2,13 @@
 import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { applyTheme, DEFAULT_THEME, readThemeKey, themeOf, themes, writeThemeKey, type Theme } from "@/lib/themes";
+import { saveTheme } from "@/app/settings/actions";
+import { alertError } from "@/lib/alerts";
+import { reach } from "@/lib/reach";
 
-// Picks the app's colours for this person on this phone. A tap applies the theme at
-// once, so the sheet itself is the preview; the choice is kept in localStorage.
+// Picks the app's colours for this person. A tap applies the theme at once, so the
+// sheet itself is the preview; the choice is saved to their account (every phone
+// they use) and kept on this phone too, for when there is no signal.
 export function ThemePicker({ person, open, onClose }: { person: string; open: boolean; onClose: () => void }) {
   // Read from storage rather than the page, so it is right for this person even
   // before the effect below has repainted after a switch of person.
@@ -15,7 +19,11 @@ export function ThemePicker({ person, open, onClose }: { person: string; open: b
   // this covers arriving here by client navigation after picking another name.
   useEffect(() => { applyTheme(themeOf(readThemeKey(person))); }, [person]);
 
-  const choose = (theme: Theme) => { setCurrent(theme.key); applyTheme(theme); writeThemeKey(person, theme.key); };
+  const choose = async (theme: Theme) => {
+    setCurrent(theme.key); applyTheme(theme); writeThemeKey(person, theme.key);
+    const result = await reach(saveTheme(theme.key));
+    if (!result.ok) alertError(`เปลี่ยนสีในเครื่องนี้แล้ว แต่ยังบันทึกไม่ได้: ${result.message}`);
+  };
   // Same exit as the other sheets; the length matches sheet-out in globals.css.
   const close = () => { setClosing(true); window.setTimeout(() => { setClosing(false); onClose(); }, 160); };
 
@@ -26,11 +34,11 @@ export function ThemePicker({ person, open, onClose }: { person: string; open: b
         <h2 id="theme-title" className="text-2xl font-bold">ธีมสี</h2>
         <button onClick={close} className="tap grid place-items-center rounded-full" aria-label="ปิด"><X/></button>
       </div>
-      <p className="mt-1 text-[.95rem] text-[var(--muted)]">เปลี่ยนได้เฉพาะเครื่องนี้ของคุณ คนอื่นยังเห็นสีของตัวเอง</p>
+      <p className="mt-1 text-[.95rem] text-[var(--muted)]">บันทึกไว้กับชื่อคุณ เข้าเครื่องไหนก็เป็นสีนี้ คนอื่นยังเห็นสีของตัวเอง</p>
       <ul className="mt-5 grid gap-2.5">{themes.map((theme) => {
         const chosen = theme.key === current;
         return <li key={theme.key}>
-          <button type="button" onClick={() => choose(theme)} aria-pressed={chosen} className="theme-tile tap w-full">
+          <button type="button" onClick={() => void choose(theme)} aria-pressed={chosen} className="theme-tile tap w-full">
             <span className="theme-swatch" aria-hidden>{[theme.ink, theme.slate, theme.sky, theme.accent, theme.paper].map((c, i) => <span key={i} style={{ background: c }}/>)}</span>
             <span className="min-w-0 flex-1 text-left">
               <span className="block truncate font-medium">{theme.name}</span>

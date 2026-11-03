@@ -1,7 +1,7 @@
 // The trip's name and dates. `compact` is the home page's one-line version, which
 // has a whole screen of cards to fit under it.
 export function AppHeader({ name, dates, compact = false }: { name: string; dates: string; compact?: boolean }) {
-  if (compact) return <header className="mb-1.5 flex items-baseline justify-between gap-3">
+  if (compact) return <header className="flex items-baseline justify-between gap-3">
     <h1 className="min-w-0 truncate text-[1.35rem] leading-tight font-bold tracking-tight">{name}</h1>
     <p className="shrink-0 text-[.8rem] text-[var(--muted)]">{dates}</p>
   </header>;

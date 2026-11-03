@@ -143,3 +143,14 @@ model PollVote {
 
   @@id([pollId, person])
 }
+
+// What each person has chosen for themselves, whichever phone they use: the order
+// of the home page's sections and their colour theme. A row exists only once
+// someone changes something; everyone else gets the defaults (lib/home-layout,
+// lib/themes).
+model Preferences {
+  person       String   @id
+  homeSections String[] @default([])
+  theme        String?
+  updatedAt    DateTime @updatedAt
+}

@@ -41,6 +41,11 @@
   /* What shadows and the dialog scrim are mixed from: the ink by day, black for a
      dark theme, where a light ink would glow instead. */
   --deep: var(--ink);
+  /* Light on glass: real white, not a palette role, since a dark theme turns the
+     palette's light colours dark and a highlight must stay a highlight. */
+  --glass-hi: rgb(255 255 255 / .55);
+  --glass-edge: rgb(255 255 255 / .28);
+  --glass-tint: rgb(255 255 255 / .1);
 
   /* Roles built from the five above. Components reference these, never raw hex,
      so re-theming means editing this block alone. */
@@ -243,17 +248,25 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 /* A floating glass pill, not a bar across the bottom: frosted, lit along its top
    edge, with a disc for the hotel rising out of its middle. The active slot gets a
    bubble that springs in behind it. Everything springs on the same curve. */
-.nav-bar { --spring: cubic-bezier(.34, 1.56, .64, 1); position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); left: 12px; z-index: 40; display: grid; width: min(100% - 24px, 520px); margin-inline: auto; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 8px 6px; border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent); border-radius: 30px; background: color-mix(in srgb, var(--card) 64%, transparent); box-shadow: 0 18px 44px color-mix(in srgb, var(--deep) 28%, transparent), inset 0 1px 0 color-mix(in srgb, var(--snow) 70%, transparent); backdrop-filter: blur(24px) saturate(1.8); -webkit-backdrop-filter: blur(24px) saturate(1.8); animation: nav-rise .5s var(--ease-out) backwards; }
+/* The glass carries its own light — a bright rim, a sheen across the top and a slow
+   sweep — so it reads as glass on the fixed home page too, where nothing scrolls
+   behind it to blur. */
+.nav-bar { --spring: cubic-bezier(.34, 1.56, .64, 1); position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); left: 12px; z-index: 40; isolation: isolate; display: grid; overflow: visible; width: min(100% - 24px, 520px); margin-inline: auto; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 8px 6px; border: 1px solid var(--glass-edge); border-radius: 30px; background: linear-gradient(180deg, var(--glass-tint), transparent 60%), color-mix(in srgb, var(--card) 58%, transparent); box-shadow: 0 18px 44px color-mix(in srgb, var(--deep) 30%, transparent), inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 color-mix(in srgb, var(--deep) 18%, transparent), inset 0 0 22px var(--glass-tint); backdrop-filter: blur(26px) saturate(1.9); -webkit-backdrop-filter: blur(26px) saturate(1.9); animation: nav-rise .5s var(--ease-out) backwards; }
+.nav-bar::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: radial-gradient(120% 160% at 12% -40%, var(--glass-hi), transparent 46%), radial-gradient(90% 140% at 100% 140%, var(--glass-tint), transparent 55%); opacity: .55; pointer-events: none; }
+.nav-bar::after { content: ""; position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: inherit; background: linear-gradient(105deg, transparent 35%, var(--glass-tint) 45%, var(--glass-edge) 50%, var(--glass-tint) 55%, transparent 65%) no-repeat; background-size: 250% 100%; animation: nav-sheen 7s ease-in-out infinite; pointer-events: none; }
+@keyframes nav-sheen { 0%, 55% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
 @keyframes nav-rise { from { opacity: 0; transform: translateY(18px); } }
 .nav-item { position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 56px; padding: 8px 0 6px; border: 0; border-radius: 20px; background: none; color: var(--muted); font-size: .68rem; font-weight: 500; -webkit-tap-highlight-color: transparent; }
 .nav-item > svg, .nav-item > span:first-child { transition: transform .4s var(--spring), color .2s ease; }
 .nav-item:active > svg, .nav-item:active > span:first-child { transform: scale(.82); transition-duration: .1s; }
 .nav-item[aria-current="page"] { color: var(--ink); }
 .nav-item[aria-current="page"] > svg, .nav-item[aria-current="page"] > span:first-child { color: var(--accent); transform: scale(1.06); }
-.nav-item[aria-current="page"]::before { content: ""; position: absolute; inset: 0 2px; z-index: -1; border-radius: 20px; background: color-mix(in srgb, var(--sky) 60%, transparent); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--snow) 60%, transparent); animation: nav-pop .45s var(--spring) backwards; }
+/* The active slot is a lens of glass inside the glass: lit rim, a soft tint of the
+   theme, a little depth at its foot. */
+.nav-item[aria-current="page"]::before { content: ""; position: absolute; inset: 0 2px; z-index: -1; border: 1px solid var(--glass-edge); border-radius: 20px; background: linear-gradient(180deg, var(--glass-tint), transparent 70%), color-mix(in srgb, var(--sky) 42%, transparent); box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -8px 14px color-mix(in srgb, var(--deep) 10%, transparent), 0 4px 12px color-mix(in srgb, var(--deep) 14%, transparent); backdrop-filter: blur(10px) saturate(2); -webkit-backdrop-filter: blur(10px) saturate(2); animation: nav-pop .45s var(--spring) backwards; }
 @keyframes nav-pop { from { opacity: 0; transform: scale(.6); } }
 .nav-stay { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 56px; padding-bottom: 6px; color: var(--ink); font-size: .68rem; font-weight: 600; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-.nav-stay-button { position: relative; display: grid; width: 60px; height: 60px; margin-top: -30px; place-items: center; border: 4px solid color-mix(in srgb, var(--card) 90%, transparent); border-radius: 999px; background: linear-gradient(145deg, var(--ink), var(--slate)); color: var(--on-dark); box-shadow: 0 12px 28px color-mix(in srgb, var(--deep) 36%, transparent), inset 0 1px 0 color-mix(in srgb, var(--snow) 35%, transparent); transition: transform .4s var(--spring); }
+.nav-stay-button { position: relative; display: grid; width: 60px; height: 60px; margin-top: -30px; place-items: center; border: 4px solid color-mix(in srgb, var(--card) 70%, transparent); outline: 1px solid var(--glass-edge); outline-offset: -1px; border-radius: 999px; background: linear-gradient(145deg, var(--ink), var(--slate)); color: var(--on-dark); box-shadow: 0 12px 28px color-mix(in srgb, var(--deep) 36%, transparent), inset 0 1px 0 color-mix(in srgb, var(--snow) 35%, transparent); transition: transform .4s var(--spring); }
 /* A slow breath of accent light behind the disc, so the eye finds it first. */
 .nav-stay-button::after { content: ""; position: absolute; inset: -10px; z-index: -1; border-radius: 999px; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 28%, transparent), transparent 70%); animation: nav-glow 3.2s ease-in-out infinite alternate; }
 @keyframes nav-glow { from { opacity: .45; transform: scale(.9); } to { opacity: 1; transform: scale(1.08); } }
@@ -274,32 +287,64 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
    up" card takes the height the other cards leave, and a whole day's list scrolls
    inside that card. A screen too short to hold it all falls back to scrolling. */
 @media (max-width: 700px) {
-  .home { display: flex; flex-direction: column; min-height: 100dvh; }
-  .home > .page-enter { display: flex; flex: 1; flex-direction: column; min-height: 0; }
-  /* The cards keep their gaps; the "next up" card takes whatever height is left and
-     pins its list of what follows to its bottom edge, so a tall screen shows more
-     of the day instead of air between cards. It is also the one card allowed to
-     give way on a screen that cannot hold everything. */
+  /* The page itself never scrolls on a phone, whatever the screen leaves it:
+     Safari's toolbars, or the notch and home bar of the home-screen app (the
+     shell's padding already holds the safe-area insets). If the cards still do
+     not fit, only the area between the header and the bar scrolls. */
+  /* The scroll area runs to the bottom edge, under the bar, with the bar's height
+     as padding at its end: on a screen too short for every card, they slide
+     beneath the glass as on any other page, and the last one still scrolls clear. */
+  .home { display: flex; height: 100dvh; flex-direction: column; overflow: hidden; padding-bottom: 0; }
+  /* It spans the full width, gutters included as its own padding: a scroll area
+     clips what spills past its edges, and edges inside the gutter would cut the
+     cards' soft shadows off in straight lines that read as a darker panel. */
+  .home > .page-enter { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; margin-inline: -16px; padding: 0 16px calc(90px + env(safe-area-inset-bottom)); }
+  .home > .page-enter::-webkit-scrollbar { display: none; }
+  /* Every card keeps its own height and the gaps stay even; the converter takes
+     whatever height is left, its numbers growing with it, so a tall screen gets a
+     bigger till-side calculator rather than air. */
   .home > .page-enter > * { flex-shrink: 0; }
-  .home > .page-enter > .hero { flex: 1 1 auto; min-height: 150px; }
-  /* The extras in the "next up" card (the description, what is on now, what
-     follows) are for screens with the height for them; an iPhone 12 keeps the
-     essentials so the six sections still fit without scrolling. */
-  /* Nothing inside the card shrinks or slides over its neighbour: short of room,
-     the list at the bottom is clipped by the card's edge instead. */
-  .home .hero > * { flex-shrink: 0; }
-  .hero-extra, .hero-extra-xl { display: none; }
-  .hero-upcoming li:nth-child(n + 3) { display: none; }
-  .hero-desc { overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
-  /* An iPhone 12 (844px) holds the description; a Plus or Pro Max adds what
-     follows; taller still adds what is on now and more of the day. */
-  @media (min-height: 820px) { .hero-extra.hero-desc { display: -webkit-box; } }
-  @media (min-height: 880px) { .hero-extra { display: block; } .hero-extra.hero-desc { display: -webkit-box; } }
-  @media (min-height: 970px) { .hero-extra-xl { display: block; } .hero-desc { -webkit-line-clamp: 2; } .hero-upcoming li:nth-child(n + 3) { display: flex; } }
+  .home .money-card { display: flex; flex: 1 0 auto; flex-direction: column; }
+  .home .money-body { display: flex; flex: 1; flex-direction: column; justify-content: center; }
+  .home .flight-card { padding: 13px 16px; }
 }
-@media (max-width: 700px) and (min-height: 780px) { .home { height: 100dvh; overflow: hidden; padding-bottom: calc(90px + env(safe-area-inset-bottom)); } .home .flight-card { padding: 13px 16px; } }
+/* Shorter screens give up the extras first: the second "what follows" line, then
+   the list itself, then the converter's spare row height. */
+@media (max-width: 700px) and (max-height: 879px) { .home .hero-next li:nth-child(n + 2) { display: none; } }
+@media (max-width: 700px) and (max-height: 799px) {
+  .home .hero-next { display: none; }
+  .home .hero .border-t { display: none; }
+  .home .money-row { min-height: 48px; }
+  .home .money-amount { min-height: 40px; }
+  .home > .page-enter { gap: 8px; }
+}
 /* The red dot: something new waits behind this icon. */
 .unread-dot { position: absolute; top: -3px; right: -4px; width: 9px; height: 9px; border: 2px solid var(--card); border-radius: 999px; background: var(--accent); box-sizing: content-box; animation: nav-pop .45s cubic-bezier(.34, 1.56, .64, 1) backwards; }
+/* Home layout editor (components/home-layout-editor.tsx) --------------------- */
+/* Widgets are likenesses of the home page's cards, picked up whole. The swap-row
+   rules above give the lift and the dashed target; here the target dims a little
+   so the widget being carried reads above it. */
+.widget-row { position: relative; border-radius: 22px; }
+.widget-row[data-over="true"] { background: transparent; outline: 2px dashed var(--accent); outline-offset: 3px; }
+.widget-row[data-over="true"] .widget-face { opacity: .55; }
+.widget-face { padding: 12px 52px 12px 16px; border-radius: 20px; pointer-events: none; transition: opacity .15s ease; }
+.widget-face.hero { border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.widget-face.flight-card { padding: 12px 52px 12px 16px; }
+.widget-grip { position: absolute; top: 50%; right: 8px; display: grid; width: 36px; height: 36px; transform: translateY(-50%); place-items: center; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--card) 70%, transparent); color: var(--muted); cursor: grab; }
+.widget-row .flight-card + .widget-grip { background: color-mix(in srgb, var(--snow) 20%, transparent); color: var(--on-dark); }
+/* Money (components/money.tsx) ------------------------------------------------ */
+.money-flag { display: grid; width: 32px; height: 32px; flex: 0 0 auto; place-items: center; border-radius: 999px; background: var(--paper); font-size: 1.15rem; line-height: 1; }
+/* A bare, right-aligned box: the number is the point, not the field around it. */
+.money-amount { width: 100%; min-width: 0; min-height: 46px; padding: 0 12px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--paper) 70%, transparent); color: var(--ink); font-size: 1.25rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.money-amount:focus { outline: 2px solid var(--accent-ring); outline-offset: 0; }
+.money-result { padding-right: 12px; font-size: 1.35rem; line-height: 1; }
+.home .money-card .money-amount, .home .money-card .money-result { font-size: clamp(1.35rem, 4.2vh - 1rem, 2rem); }
+/* Each currency gets a full-height row, and the amount sits in a soft pill that
+   reads as the place to tap, so the box is easy to hit with a thumb. */
+.money-row { min-height: 54px; }
+.home .money-card .money-row { flex: 1; max-height: 84px; }
+.money-swap { position: absolute; top: 50%; left: 50%; display: grid; width: 30px; height: 30px; min-width: 30px; min-height: 30px; transform: translate(-50%, -50%); place-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+.money-swap:active { transform: translate(-50%, -50%) rotate(180deg) scale(.9); }
 /* Polls (components/poll-board.tsx) ------------------------------------------- */
 /* The share of votes is a bar painted behind the row; the row itself stays a button
    so a tap anywhere on it is a vote. */

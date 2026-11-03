@@ -5,6 +5,7 @@ import type { DayData } from "@/lib/types";
 import { swapDays } from "@/app/actions";
 import { alertError, toastSuccess } from "@/lib/alerts";
 import { dayLabel } from "@/lib/format";
+import { reach } from "@/lib/reach";
 
 const countLabel = (day: DayData) => (day.activities.length ? `${day.activities.length} กิจกรรม` : "ว่าง");
 
@@ -26,7 +27,7 @@ export function DaySwap({ day, days, flightDates }: { day: DayData; days: DayDat
 
   const swap = async () => {
     if (!target) return;
-    setBusy(true); const result = await swapDays(day.id, target.id); setBusy(false);
+    setBusy(true); const result = await reach(swapDays(day.id, target.id)); setBusy(false);
     if (!result.ok) { alertError(result.message); return; }
     toastSuccess(`สลับ ${dayLabel(day.date)} กับ ${dayLabel(target.date)} แล้ว`);
     close();
