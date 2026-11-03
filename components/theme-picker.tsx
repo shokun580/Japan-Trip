@@ -29,13 +29,17 @@ export function ThemePicker({ person, open, onClose }: { person: string; open: b
 
   if (!open) return null;
   return <div className="overlay fixed inset-0 z-50 flex items-center justify-center bg-[var(--ink)]/55 p-4 sm:p-5" data-closing={closing} role="dialog" aria-modal="true" aria-labelledby="theme-title">
-    <div className="sheet max-h-[92dvh] w-full max-w-lg overflow-auto rounded-[28px] bg-[var(--card)] p-5 shadow-2xl sm:p-7">
-      <div className="flex items-center justify-between">
-        <h2 id="theme-title" className="text-2xl font-bold">ธีมสี</h2>
-        <button onClick={close} className="tap grid place-items-center rounded-full" aria-label="ปิด"><X/></button>
+    <div className="sheet max-h-[92dvh] w-full max-w-lg overflow-auto rounded-[28px] bg-[var(--card)] px-5 pb-5 shadow-2xl sm:px-7 sm:pb-7">
+      {/* The title, the close button and what a choice does stay in view while the
+          list scrolls under them. */}
+      <div className="sheet-head -mx-5 px-5 pt-5 pb-3 sm:-mx-7 sm:px-7 sm:pt-7">
+        <div className="flex items-center justify-between">
+          <h2 id="theme-title" className="text-2xl font-bold">ธีมสี</h2>
+          <button onClick={close} className="tap grid place-items-center rounded-full" aria-label="ปิด"><X/></button>
+        </div>
+        <p className="mt-1 text-[.95rem] text-[var(--muted)]">บันทึกไว้กับชื่อคุณ เข้าเครื่องไหนก็เป็นสีนี้ คนอื่นยังเห็นสีของตัวเอง</p>
       </div>
-      <p className="mt-1 text-[.95rem] text-[var(--muted)]">บันทึกไว้กับชื่อคุณ เข้าเครื่องไหนก็เป็นสีนี้ คนอื่นยังเห็นสีของตัวเอง</p>
-      <ul className="mt-5 grid gap-2.5">{themes.map((theme) => {
+      <ul className="mt-3 grid gap-2.5">{themes.map((theme) => {
         const chosen = theme.key === current;
         return <li key={theme.key}>
           <button type="button" onClick={() => void choose(theme)} aria-pressed={chosen} className="theme-tile tap w-full">

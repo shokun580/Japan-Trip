@@ -338,6 +338,11 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 .money-amount { width: 100%; min-width: 0; min-height: 46px; padding: 0 12px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--paper) 70%, transparent); color: var(--ink); font-size: 1.25rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 .money-amount:focus { outline: 2px solid var(--accent-ring); outline-offset: 0; }
 .money-result { padding-right: 12px; font-size: 1.35rem; line-height: 1; }
+.money-result[data-empty="true"] { color: var(--muted); opacity: .6; }
+/* The amount box carries the same clear X as every other box, at its right end. */
+.money-box { position: relative; display: block; }
+.money-box .money-amount { padding-right: 44px; }
+.money-amount::placeholder { color: var(--muted); opacity: .5; }
 .home .money-card .money-amount, .home .money-card .money-result { font-size: clamp(1.35rem, 4.2vh - 1rem, 2rem); }
 /* Each currency gets a full-height row, and the amount sits in a soft pill that
    reads as the place to tap, so the box is easy to hit with a thumb. */
@@ -345,6 +350,8 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 .home .money-card .money-row { flex: 1; max-height: 84px; }
 .money-swap { position: absolute; top: 50%; left: 50%; display: grid; width: 30px; height: 30px; min-width: 30px; min-height: 30px; transform: translate(-50%, -50%); place-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink); transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
 .money-swap:active { transform: translate(-50%, -50%) rotate(180deg) scale(.9); }
+/* A sheet's header that stays put while its list scrolls under it. */
+.sheet-head { position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--line); background: var(--card); }
 /* Polls (components/poll-board.tsx) ------------------------------------------- */
 /* The share of votes is a bar painted behind the row; the row itself stays a button
    so a tap anywhere on it is a vote. */

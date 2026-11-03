@@ -1,6 +1,6 @@
 "use client";
-import { ArrowUpDown } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpDown, X } from "lucide-react";
+import { useRef, useState } from "react";
 import type { YenRate } from "@/lib/rates";
 
 // Two currencies, one box: the amount goes in on the top row and comes out on the
@@ -20,9 +20,13 @@ function Row({ side, children }: { side: Side; children: React.ReactNode }) {
 
 const format = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: n >= 100 ? 0 : 2 });
 
+// The box starts empty: the first thing anyone types is the price in front of them.
 export function Money({ rate }: { rate: YenRate | null }) {
   const [from, setFrom] = useState<Side>("JPY");
-  const [amount, setAmount] = useState("1000");
+  const [amount, setAmount] = useState("");
+  const box = useRef<HTMLInputElement>(null);
+  // Empties the box and keeps the keyboard up for the next price.
+  const clear = () => { setAmount(""); box.current?.focus(); };
   const to: Side = from === "JPY" ? "THB" : "JPY";
   const type = (value: string) => setAmount(value.replace(/\D/g, "").slice(0, 8));
   // The rate is yen to baht; the other way round is its inverse.
@@ -40,9 +44,11 @@ export function Money({ rate }: { rate: YenRate | null }) {
     </div>
     <div className="money-body relative mt-1">
       <Row side={from}>
-        <label className="min-w-0 flex-1">
+        <label className="money-box min-w-0 flex-1">
           <span className="sr-only">จำนวน{SIDES[from].name}</span>
-          <input value={amount ? Number(amount).toLocaleString("en-US") : ""} onChange={(e) => type(e.target.value)} inputMode="numeric" pattern="[0-9]*" autoComplete="off" className="money-amount" aria-label={`จำนวน${SIDES[from].name}`}/>
+          <input ref={box} value={amount ? Number(amount).toLocaleString("en-US") : ""} onChange={(e) => type(e.target.value)} inputMode="numeric" pattern="[0-9]*" autoComplete="off" placeholder="0" className="money-amount" aria-label={`จำนวน${SIDES[from].name}`}/>
+          {/* Holding mousedown back keeps the focus, and the phone keyboard, in the box. */}
+          {amount && <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={clear} className="field-clear" aria-label="ล้างจำนวน"><span><X size={13} strokeWidth={3}/></span></button>}
         </label>
       </Row>
       {/* The swap sits on the line between the rows, where the eye expects it. */}
@@ -50,7 +56,7 @@ export function Money({ rate }: { rate: YenRate | null }) {
         <button type="button" onClick={swap} className="money-swap tap" aria-label="สลับสกุลเงิน"><ArrowUpDown size={15}/></button>
       </div>
       <Row side={to}>
-        <p className="money-result min-w-0 flex-1 truncate text-right font-bold tabular-nums" aria-live="polite">{SIDES[to].sign}{format(value)}</p>
+        <p className="money-result min-w-0 flex-1 truncate text-right font-bold tabular-nums" data-empty={!amount} aria-live="polite">{SIDES[to].sign}{format(value)}</p>
       </Row>
     </div>
   </section>;
