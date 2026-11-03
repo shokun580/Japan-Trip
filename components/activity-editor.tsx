@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
-import { Lock, Pencil, PlaneLanding, PlaneTakeoff, Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpDown, GripHorizontal, Lock, Pencil, PlaneLanding, PlaneTakeoff, Plus, Trash2, X } from "lucide-react";
+import { startTransition, useOptimistic, useState } from "react";
 import type { ActionResult, ActivityData, DayData } from "@/lib/types";
-import { deleteActivity, saveActivity } from "@/app/actions";
+import { deleteActivity, saveActivity, swapActivities } from "@/app/actions";
 import { alertError, confirmDelete, toastSuccess } from "@/lib/alerts";
-import { durationLabel, type TimelineEntry } from "@/lib/timeline";
+import { durationLabel, swapEntries, type TimelineEntry } from "@/lib/timeline";
 import { dayLabel } from "@/lib/format";
+import { useDragSwap } from "@/lib/use-drag-swap";
+import { Field, TextArea } from "./field";
 
 export function ActivityEditor({ day, days, entries }: { day: DayData; days: DayData[]; entries: TimelineEntry[] }) {
   const [editing, setEditing] = useState<ActivityData | "new" | null>(null);
@@ -29,11 +31,23 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
     report(result, "ลบกิจกรรมแล้ว");
   };
 
+  // A swap shows at once; the server's answer replaces it, or puts it back on failure.
+  const [shown, swapShown] = useOptimistic(entries, (current, [from, to]: [string, string]) => swapEntries(current, from, to));
+  const swap = (from: string, to: string) => startTransition(async () => {
+    swapShown([from, to]);
+    report(await swapActivities(from, to), "สลับเวลาแล้ว");
+  });
+  const { list, lifted, over, row, keys } = useDragSwap(shown.map((e) => `${e.id}@${e.time}`).join(), swap);
+  const activities = shown.flatMap((e) => (e.kind === "activity" ? [e.activity] : []));
+  const canSwap = activities.length > 1;
+  const timeOf = (id: string | null) => activities.find((a) => a.id === id)?.time;
+
   return <div>
     <button onClick={() => open("new")} className="tap mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--ink)] px-4 py-2 font-medium text-[var(--on-dark)]"><Plus size={20}/>เพิ่มกิจกรรม</button>
 
     {entries.length === 0 && <p className="mt-4 text-[var(--muted)]">ยังไม่มีกิจกรรมสำหรับวันนี้</p>}
-    <ul className="mt-4 space-y-3">{entries.map((entry) => {
+    {canSwap && <p className="mt-4 flex items-center gap-2 text-sm text-[var(--muted)]"><ArrowUpDown size={16} className="shrink-0"/>กดค้างแล้วลากไปวาง เพื่อสลับเวลา</p>}
+    <ul ref={list} className="mt-4 space-y-3">{shown.map((entry) => {
       // Same dark treatment as the timeline, so a flight reads as a flight everywhere.
       if (entry.kind === "flight") return <li key={entry.id} className="flight-leg">
         <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
@@ -52,9 +66,16 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
       </li>;
 
       const { activity } = entry;
-      return <li key={entry.id} className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4">
+      // While a card hovers over another, each shows the time it is about to get.
+      const preview = activity.id === lifted ? timeOf(over) : activity.id === over ? timeOf(lifted) : undefined;
+      return <li key={entry.id} {...(canSwap ? row(activity.id) : {})} className="swap-row rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4" data-lifted={activity.id === lifted} data-over={activity.id === over}>
         <div className="flex gap-3">
-          <time className="font-semibold tabular-nums">{activity.time}</time>
+          {canSwap
+            ? <button type="button" {...keys(activity.id)} className="swap-key -my-2 -ml-2 flex w-[4.25rem] shrink-0 flex-col items-center self-start rounded-lg py-2" aria-label={`${activity.time} ${activity.name} กดค้างแล้วลาก หรือกดลูกศรขึ้นลง เพื่อสลับเวลา`}>
+                <time className="font-semibold tabular-nums" data-preview={Boolean(preview)}>{preview ?? activity.time}</time>
+                <GripHorizontal size={16} className="text-[var(--muted)]" aria-hidden/>
+              </button>
+            : <time className="font-semibold tabular-nums">{activity.time}</time>}
           <div className="min-w-0 flex-1"><p className="font-medium">{activity.name}</p>{activity.description && <p className="mt-1 line-clamp-2 text-sm text-[var(--muted)]">{activity.description}</p>}</div>
           {/* Pulled into the card's padding so the 48px touch targets cost no extra height. */}
           <div className="-mt-2 -mr-2 flex shrink-0 items-start">
@@ -90,10 +111,10 @@ export function ActivityEditor({ day, days, entries }: { day: DayData; days: Day
               </span>
             </label>)}</div>
           </fieldset>
-          <label className="label">เวลา<input className="field" type="time" name="time" defaultValue={editing === "new" ? "09:00" : editing.time} required/></label>
-          <label className="label">ชื่อ<input className="field" name="name" defaultValue={editing === "new" ? "" : editing.name} maxLength={120} required/></label>
-          <label className="label">รายละเอียด<textarea className="field min-h-28 resize-y" name="description" defaultValue={editing === "new" ? "" : editing.description ?? ""} maxLength={1000}/></label>
-          <label className="label">ลิงก์แผนที่<input className="field" type="url" name="mapUrl" placeholder="https://maps.google.com/…" defaultValue={editing === "new" ? "" : editing.mapUrl ?? ""}/></label>
+          <label className="label">เวลา<Field type="time" name="time" defaultValue={editing === "new" ? "09:00" : editing.time} required/></label>
+          <label className="label">ชื่อ<Field name="name" defaultValue={editing === "new" ? "" : editing.name} maxLength={120} required/></label>
+          <label className="label">รายละเอียด<TextArea className="min-h-28 resize-y" name="description" defaultValue={editing === "new" ? "" : editing.description ?? ""} maxLength={1000}/></label>
+          <label className="label">ลิงก์แผนที่<Field type="url" name="mapUrl" placeholder="https://maps.google.com/…" defaultValue={editing === "new" ? "" : editing.mapUrl ?? ""}/></label>
           <div className="mt-2 grid grid-cols-2 gap-3">
             <button type="button" onClick={close} className="tap rounded-xl border border-[var(--line)] font-medium">ยกเลิก</button>
             <button disabled={busy} className="tap rounded-xl bg-[var(--ink)] font-medium text-[var(--on-dark)] disabled:opacity-40">{busy ? "กำลังบันทึก…" : editing !== "new" && moving ? `ย้ายไป ${dayLabel(target.date)}` : "บันทึก"}</button>

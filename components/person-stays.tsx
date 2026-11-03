@@ -6,14 +6,15 @@ import { people, personName, personOf } from "@/lib/people";
 import { deletePersonStay, savePersonStay } from "@/app/actions";
 import { alertError, confirmAction, toastSuccess } from "@/lib/alerts";
 import { AlertForm } from "./alert-form";
+import { Field } from "./field";
 
 function StayFields({ stay, disabled }: { stay?: PersonStayData; disabled: boolean }) {
   return <>
-    <label className="label">ชื่อที่พัก<input className="field" name="name" required defaultValue={stay?.name ?? ""} disabled={disabled}/></label>
+    <label className="label">ชื่อที่พัก<Field name="name" required defaultValue={stay?.name ?? ""} disabled={disabled}/></label>
     <label className="label">ลิงก์แผนที่
       <div className="relative">
         <MapPin className="pointer-events-none absolute top-3.5 left-3 text-[var(--muted)]" size={20}/>
-        <input className="field field-icon" type="url" name="mapUrl" placeholder="https://maps.google.com/…" defaultValue={stay?.mapUrl ?? ""} disabled={disabled}/>
+        <Field className="field-icon" type="url" name="mapUrl" placeholder="https://maps.google.com/…" defaultValue={stay?.mapUrl ?? ""} disabled={disabled}/>
       </div>
     </label>
   </>;

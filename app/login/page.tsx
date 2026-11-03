@@ -21,6 +21,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <input type="hidden" name="next" value={next} />
       <PersonPicker current={current} next={next} />
     </form>
-    <p className="mt-6 text-center text-[.82rem] text-[var(--muted)]">เปลี่ยนคนทีหลังได้ตลอดจากเมนูมุมบนขวา</p>
+    <p className="mt-6 text-center text-[.82rem] text-[var(--muted)]">เปลี่ยนคนทีหลังได้ตลอดจากหน้าตั้งค่า</p>
   </main>;
 }

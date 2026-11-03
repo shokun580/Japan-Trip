@@ -4,6 +4,8 @@ import { dayLabel } from "@/lib/format";
 import { ActivityEditor } from "@/components/activity-editor";
 import { dayEntries } from "@/lib/timeline";
 import { DayTitleField } from "@/components/day-title-field";
+import { DaySwap } from "@/components/day-swap";
+import { DayShift } from "@/components/day-shift";
 
 export const dynamic = "force-dynamic";
 
@@ -12,15 +14,22 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
   const params = await searchParams;
   const selected = trip.days.find((d) => d.id === params.day) ?? trip.days[0];
   const readOnly = !process.env.DATABASE_URL;
+  const flightDates = [trip.outbound, trip.inbound].flatMap((f) => (f.date && f.takeoffTime ? [f.date] : []));
 
   return <section>
     <h2 className="text-xl font-bold">กิจกรรม</h2>
-    <p className="mt-1 text-sm text-[var(--ink)]">เลือกวัน ตั้งชื่อวัน แล้วเพิ่มหรือแก้ไขกิจกรรมของวันนั้น จะย้ายกิจกรรมไปวันอื่นก็กดแก้ไขแล้วเลือกวันใหม่ได้เลย</p>
+    <p className="mt-1 text-sm text-[var(--ink)]">เลือกวัน ตั้งชื่อวัน แล้วเพิ่มหรือแก้ไขกิจกรรมของวันนั้น จะย้ายกิจกรรมไปวันอื่นก็กดแก้ไขแล้วเลือกวันใหม่ได้เลย ส่วนปุ่มสลับทั้งวันจะแลกแผนทั้งวันกับวันอื่น</p>
     <div className="slider mt-4 flex gap-2" aria-label="เลือกวัน">
       {trip.days.map((d) => <Link key={d.id} href={`/manage/activities?day=${d.id}`} className={`tap flex shrink-0 items-center rounded-xl border px-4 font-medium ${selected?.id === d.id ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--on-dark)]" : "border-[var(--line)] bg-[var(--card)]"}`}>{dayLabel(d.date)}</Link>)}
     </div>
     {selected && <div className="card mt-4 p-5 sm:p-7">
-      <p className="eyebrow">{dayLabel(selected.date)}</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="eyebrow">{dayLabel(selected.date)}</p>
+        {!readOnly && <div className="-mr-2 flex items-center gap-1">
+          <DayShift day={selected}/>
+          {trip.days.length > 1 && <DaySwap day={selected} days={trip.days} flightDates={flightDates}/>}
+        </div>}
+      </div>
       {readOnly
         ? <>
             <h3 className="mt-1 text-xl font-semibold">{selected.title}</h3>

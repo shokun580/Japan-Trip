@@ -30,31 +30,36 @@
 }
 
 :root {
-  /* The five palette colours — the only raw values in the project. */
+  /* The five palette colours — the only raw values in the project. A theme
+     (lib/themes.ts) overrides these six on <html>; everything below is mixed from
+     them, so nothing else needs to know which theme is on. */
   --ink: #495867;
   --slate: #577399;
   --sky: #bdd5ea;
   --snow: #f7f7ff;
   --accent: #fe5f55;
+  /* What shadows and the dialog scrim are mixed from: the ink by day, black for a
+     dark theme, where a light ink would glow instead. */
+  --deep: var(--ink);
 
   /* Roles built from the five above. Components reference these, never raw hex,
      so re-theming means editing this block alone. */
-  --muted: var(--slate);
   --paper: var(--sky);
+  --muted: var(--slate);
   --card: var(--snow);
-  --line: rgb(87 115 153 / .28);
-  --line-strong: rgb(87 115 153 / .45);
-  --shade: rgb(73 88 103 / .16);
+  --line: color-mix(in srgb, var(--slate) 28%, transparent);
+  --line-strong: color-mix(in srgb, var(--slate) 45%, transparent);
+  --shade: color-mix(in srgb, var(--deep) 16%, transparent);
   --on-dark: var(--snow);
-  --on-dark-soft: rgb(247 247 255 / .64);
-  --on-dark-faint: rgb(247 247 255 / .42);
-  --on-dark-line: rgb(247 247 255 / .18);
-  --accent-ring: rgb(254 95 85 / .26);
-  --accent-wash: rgb(254 95 85 / .12);
+  --on-dark-soft: color-mix(in srgb, var(--snow) 64%, transparent);
+  --on-dark-faint: color-mix(in srgb, var(--snow) 42%, transparent);
+  --on-dark-line: color-mix(in srgb, var(--snow) 18%, transparent);
+  --accent-ring: color-mix(in srgb, var(--accent) 26%, transparent);
+  --accent-wash: color-mix(in srgb, var(--accent) 12%, transparent);
   /* Loading placeholders: ghost cards in faded snow, text lines in the line tone. */
-  --ghost: rgb(247 247 255 / .62);
-  --ghost-dark: rgb(73 88 103 / .55);
-  --scrim: rgb(73 88 103 / .55);
+  --ghost: color-mix(in srgb, var(--snow) 62%, transparent);
+  --ghost-dark: color-mix(in srgb, var(--ink) 55%, transparent);
+  --scrim: color-mix(in srgb, var(--deep) 55%, transparent);
   /* One curve for everything that arrives, so the whole app moves the same way. */
   --ease-out: cubic-bezier(.2, .8, .2, 1);
 }
@@ -68,12 +73,12 @@ button, input, textarea, select { font: inherit; }
 input, textarea, select, img { max-width: 100%; }
 button, a { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid var(--slate); outline-offset: 3px; }
-.shell { width: min(100%, 900px); min-height: 100dvh; margin: auto; padding: calc(16px + env(safe-area-inset-top)) 16px 82px; }
+.shell { width: min(100%, 900px); min-height: 100dvh; margin: auto; padding: calc(16px + env(safe-area-inset-top)) 16px 104px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 10px 30px var(--shade); }
 /* Opaque, not translucent: this bar stays pinned while the timeline scrolls under it. */
 .day-control { top: calc(8px + env(safe-area-inset-top)); border: 1px solid var(--line); border-radius: 20px; background: var(--card); box-shadow: 0 10px 30px var(--shade); }
-.flight-card { overflow: hidden; position: relative; border-radius: 22px; padding: 16px; color: var(--on-dark); background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 18px 38px rgb(73 88 103 / .3); }
-.flight-card::after { content: ""; position: absolute; width: 130px; height: 130px; right: -45px; bottom: -80px; border: 22px solid rgb(247 247 255 / .07); border-radius: 999px; }
+.flight-card { overflow: hidden; position: relative; border-radius: 22px; padding: 16px; color: var(--on-dark); background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 18px 38px color-mix(in srgb, var(--deep) 30%, transparent); }
+.flight-card::after { content: ""; position: absolute; width: 130px; height: 130px; right: -45px; bottom: -80px; border: 22px solid color-mix(in srgb, var(--snow) 7%, transparent); border-radius: 999px; }
 .flight-icon { display: grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border-radius: 12px; color: var(--ink); background: var(--sky); }
 .flight-card-title { flex: 0 0 auto; font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--on-dark-soft); }
 .flight-card-head { display: flex; width: 100%; min-height: 34px; align-items: center; justify-content: space-between; gap: 10px; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
@@ -83,7 +88,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .flight-leg-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
 .flight-leg-row + .flight-leg-row { padding-top: 12px; border-top: 1px solid var(--on-dark-line); }
 .flight-pill { flex: 0 0 auto; padding: 6px 12px; border-radius: 999px; background: var(--sky); color: var(--ink); font-size: .74rem; font-weight: 600; white-space: nowrap; }
-.flight-leg { border-radius: 22px; padding: 16px; color: var(--on-dark); background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 10px 26px rgb(73 88 103 / .24); }
+.flight-leg { border-radius: 22px; padding: 16px; color: var(--on-dark); background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 10px 26px color-mix(in srgb, var(--deep) 24%, transparent); }
 .slider { overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; overscroll-behavior-x: contain; }
 .slider::-webkit-scrollbar { display: none; }
 .slider > * { scroll-snap-align: center; }
@@ -99,6 +104,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .field { width: 100%; min-width: 0; max-width: 100%; appearance: none; -webkit-appearance: none; border: 1px solid var(--line-strong); border-radius: 13px; background: var(--card); min-height: 48px; padding: 11px 13px; }
 /* Must come after .field: its padding shorthand otherwise overrides any utility padding-left. */
 .field-icon { padding-left: 42px; }
+/* The clear X (components/field.tsx) sits over the box's right end, and the box keeps
+   that much padding so text never runs underneath it. The tap target is the full
+   44px band; the dot drawn inside it is only 20px. A textarea gets the X on its first
+   line, where the band's 48px cap holds it. */
+.field-wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.field-wrap > .field { padding-right: 44px; }
+.field-clear { position: absolute; top: 0; right: 0; display: grid; width: 44px; height: min(100%, 48px); place-items: center; padding: 0; border: 0; background: none; color: var(--card); cursor: pointer; animation: fade-in .15s ease backwards; }
+.field-clear > span { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 999px; background: var(--line-strong); transition: transform .12s ease, background-color .12s ease; }
+.field-clear:active > span { transform: scale(.86); background: var(--muted); }
 /* minmax(0,1fr) matters as much as min-width: an implicit "auto" column would size
    itself to the input's wide intrinsic width and push straight through the card. */
 .label { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 5px; color: var(--ink); font-size: .94rem; font-weight: 500; }
@@ -146,10 +160,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .pin-key:disabled { opacity: .45; }
 .pin-status { display: flex; min-height: 24px; align-items: center; justify-content: center; gap: 7px; color: var(--on-dark-soft); font-size: .88rem; font-weight: 500; }
 @media (prefers-reduced-motion: reduce) { .pin-dots[data-status="wrong"] { animation: none; } }
-.person-badge { display: grid; flex: 0 0 auto; place-items: center; width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 8px 18px rgb(73 88 103 / .32); color: var(--on-dark); font-size: 1.12rem; font-weight: 700; }
-.person-badge[data-tone="accent"] { background: linear-gradient(135deg, var(--accent), #e8524a); box-shadow: 0 8px 18px var(--accent-ring); }
-.person-badge[data-tone="sky"] { background: linear-gradient(135deg, var(--sky), #a9c6e0); box-shadow: 0 8px 18px rgb(87 115 153 / .24); color: var(--ink); }
-.person-badge-sm { width: 46px; height: 46px; box-shadow: 0 5px 12px rgb(73 88 103 / .26); font-size: .95rem; }
+.person-badge { display: grid; flex: 0 0 auto; place-items: center; width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(135deg, var(--ink), var(--slate)); box-shadow: 0 8px 18px color-mix(in srgb, var(--deep) 32%, transparent); color: var(--on-dark); font-size: 1.12rem; font-weight: 700; }
+.person-badge[data-tone="accent"] { background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 88%, black)); box-shadow: 0 8px 18px var(--accent-ring); }
+.person-badge[data-tone="sky"] { background: linear-gradient(135deg, var(--sky), color-mix(in srgb, var(--sky) 88%, black)); box-shadow: 0 8px 18px color-mix(in srgb, var(--slate) 24%, transparent); color: var(--ink); }
+.person-badge-sm { width: 46px; height: 46px; box-shadow: 0 5px 12px color-mix(in srgb, var(--deep) 26%, transparent); font-size: .95rem; }
 .person-badge-xs { width: 34px; height: 34px; box-shadow: none; font-size: .78rem; font-weight: 600; }
 
 /* Motion ---------------------------------------------------------------------- */
@@ -193,11 +207,23 @@ button, a, label, input { touch-action: manipulation; }
 @keyframes sheet-out { to { opacity: 0; transform: translateY(14px) scale(.98); } }
 @keyframes toast-in { from { opacity: 0; transform: translateY(-14px); } }
 
+/* Swapping activities by drag (lib/use-drag-swap.ts) --------------------------- */
+/* No text selection or iOS callout on a long press: that press picks the card up.
+   transform is left out of the transitions on purpose — the drag writes it every
+   frame and must not lag behind the finger. */
+.swap-row { position: relative; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: border-color .15s ease, background-color .15s ease, box-shadow .18s ease, scale .18s var(--ease-out); }
+.swap-row[data-lifted="true"] { z-index: 10; border-color: var(--line-strong); box-shadow: 0 18px 40px color-mix(in srgb, var(--deep) 30%, transparent); scale: 1.03; cursor: grabbing; }
+.swap-row[data-over="true"] { border-color: var(--accent); border-style: dashed; background: var(--accent-wash); }
+.swap-key { cursor: grab; }
+.swap-key time { transition: color .15s ease; }
+.swap-key time[data-preview="true"] { color: var(--accent); }
+html[data-dragging], html[data-dragging] * { cursor: grabbing; }
+
 /* Dialogs and toasts (components/dialog-host.tsx) ------------------------------ */
 /* Sized to the visual viewport, not the layout one, so when the iOS keyboard opens
    for a prompt the dialog re-centres in the space left above it. */
 .dialog-overlay { position: fixed; top: var(--vv-top, 0px); right: 0; left: 0; z-index: 60; display: flex; height: var(--vv-height, 100dvh); align-items: center; justify-content: center; padding: 16px; background: var(--scrim); overscroll-behavior: contain; }
-.dialog { width: min(100%, 380px); max-height: 100%; overflow-y: auto; padding: 24px 20px 20px; border-radius: 26px; background: var(--card); box-shadow: 0 24px 60px rgb(73 88 103 / .35); color: var(--ink); text-align: center; }
+.dialog { width: min(100%, 380px); max-height: 100%; overflow-y: auto; padding: 24px 20px 20px; border-radius: 26px; background: var(--card); box-shadow: 0 24px 60px color-mix(in srgb, var(--deep) 35%, transparent); color: var(--ink); text-align: center; }
 .dialog-icon { display: grid; width: 56px; height: 56px; margin: 0 auto 14px; place-items: center; border-radius: 999px; background: var(--accent-wash); color: var(--accent); }
 .dialog-actions { display: grid; gap: 10px; margin-top: 20px; }
 .dialog-actions[data-layout="row"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -211,7 +237,48 @@ button, a, label, input { touch-action: manipulation; }
 .toast[data-closing="true"] { animation: fade-out .2s ease forwards; }
 .toast-icon { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border-radius: 999px; background: var(--sky); color: var(--ink); }
 
-@media (min-width: 700px) { .shell { padding: calc(38px + env(safe-area-inset-top)) 30px 120px; } }
+/* Offline strip (components/offline.tsx) ------------------------------------- */
+.offline-bar { position: sticky; top: 0; z-index: 45; display: flex; align-items: center; justify-content: center; gap: 8px; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; background: var(--ink); color: var(--on-dark); font-size: .85rem; font-weight: 500; text-align: center; }
+/* Bottom bar (components/bottom-nav.tsx) -------------------------------------- */
+/* Five equal slots; the hotel button in the middle rises above the bar on its own
+   disc so it reads as the one to press when lost. Opaque, like the day bar: the
+   page scrolls under it. */
+.nav-bar { position: fixed; right: 0; bottom: 0; left: 0; z-index: 40; display: grid; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 6px 6px max(8px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: color-mix(in srgb, var(--card) 95%, transparent); backdrop-filter: blur(12px); }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 52px; border: 0; border-radius: 14px; background: none; color: var(--muted); font-size: .68rem; font-weight: 500; }
+.nav-item[aria-current="page"] { color: var(--ink); }
+.nav-item[aria-current="page"] > svg, .nav-item[aria-current="page"] > span:first-child { color: var(--accent); }
+.nav-stay { display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 52px; color: var(--ink); font-size: .68rem; font-weight: 600; text-decoration: none; }
+.nav-stay-button { display: grid; width: 56px; height: 56px; margin-top: -26px; place-items: center; border: 4px solid var(--paper); border-radius: 999px; background: var(--ink); color: var(--on-dark); box-shadow: 0 10px 24px var(--shade); transition: transform .12s ease; }
+.nav-stay:active .nav-stay-button { transform: scale(.94); }
+.nav-stay[data-empty="true"] { color: var(--muted); }
+.nav-stay[data-empty="true"] .nav-stay-button { background: var(--card); border-color: var(--line-strong); border-style: dashed; color: var(--muted); box-shadow: none; }
+/* Polls (components/poll-board.tsx) ------------------------------------------- */
+/* The share of votes is a bar painted behind the row; the row itself stays a button
+   so a tap anywhere on it is a vote. */
+.poll-option { position: relative; overflow: hidden; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); transition: border-color .15s ease; }
+.poll-option[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.poll-option[data-won="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.poll-option:disabled { cursor: default; }
+.poll-bar { position: absolute; inset: 0 auto 0 0; background: color-mix(in srgb, var(--sky) 55%, transparent); transition: width .35s var(--ease-out); }
+.poll-option[data-won="true"] .poll-bar { background: var(--accent-wash); }
+.card[data-closed="true"] { box-shadow: none; }
+.flight-icon[data-tone="accent"] { background: var(--accent); color: var(--snow); }
+/* Decision wheel (components/decision-wheel.tsx) ------------------------------ */
+/* The pointer stays put at the top while the wheel turns under it. transform is
+   written by the spin itself, so the wheel has no transition of its own. */
+.wheel { display: block; width: 100%; height: auto; border-radius: 999px; box-shadow: 0 18px 40px var(--shade); }
+.wheel-pointer { position: absolute; top: -6px; left: 50%; z-index: 2; width: 0; height: 0; transform: translateX(-50%); border-left: 13px solid transparent; border-right: 13px solid transparent; border-top: 26px solid var(--ink); filter: drop-shadow(0 3px 4px var(--shade)); }
+.wheel-spin { position: absolute; top: 50%; left: 50%; z-index: 2; display: grid; width: 64px; height: 64px; place-items: center; transform: translate(-50%, -50%); border: 3px solid var(--card); border-radius: 999px; background: var(--ink); color: var(--on-dark); box-shadow: 0 8px 20px var(--shade); }
+.wheel-spin:active:not(:disabled) { transform: translate(-50%, -50%) scale(.95); }
+.wheel-spin:disabled { opacity: .6; }
+/* Theme picker (components/theme-picker.tsx) --------------------------------- */
+.theme-tile { display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 10px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--ink); transition: border-color .15s ease, transform .12s ease; }
+.theme-tile[aria-pressed="true"] { border-color: var(--ink); }
+.theme-swatch { display: grid; flex: 0 0 auto; grid-template-columns: repeat(5, 1fr); width: 72px; height: 44px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; }
+.theme-tick { display: grid; flex: 0 0 auto; width: 26px; height: 26px; place-items: center; border-radius: 999px; background: var(--ink); color: var(--on-dark); opacity: 0; transform: scale(.6); transition: opacity .15s ease, transform .15s var(--ease-out); }
+.theme-tick[data-on="true"] { opacity: 1; transform: none; }
+
+@media (min-width: 700px) { .shell { padding: calc(38px + env(safe-area-inset-top)) 30px 130px; } }
 /* No negative margins here on purpose: every card keeps the shell's own gutter so
    they all line up at the same edge instead of some poking past the others. */
 @media (max-width: 430px) {

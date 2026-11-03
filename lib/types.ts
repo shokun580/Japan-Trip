@@ -16,3 +16,8 @@ export type PackingCategoryData = { id: string; name: string; items: PackingItem
 // shows, but nothing the client changes will survive a reload.
 export type ChecklistResult = { ok: true; categories: PackingCategoryData[]; saved: boolean } | { ok: false; message: string };
 export type CreateResult = { ok: true; id: string } | { ok: false; message: string };
+// Group polls, by secret ballot: while a poll is open `votes` is null and the only
+// vote anyone sees is their own (`myVote`); the counts arrive once it is closed. Who
+// voted for what is never sent. `voted` is how many people have voted so far.
+export type PollOptionData = { id: string; label: string; votes: number | null };
+export type PollData = { id: string; question: string; createdBy: string; createdAt: string; closedAt: string | null; options: PollOptionData[]; myVote: string | null; voted: number };

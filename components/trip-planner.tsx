@@ -2,34 +2,33 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { StayData, TripData } from "@/lib/types";
+import type { ForecastByDate } from "@/lib/weather";
 import { OWNER, type PersonKey } from "@/lib/people";
-import { dayLabel, shortThaiDate } from "@/lib/format";
-import { AppHeader } from "./app-header"; import { BottomNav } from "./bottom-nav"; import { Timeline } from "./timeline";
-import { FlightCard } from "./flight-card";
-import { ChecklistButton } from "./checklist-button";
+import { dayLabel } from "@/lib/format";
+import { BottomNav } from "./bottom-nav"; import { Timeline } from "./timeline";
+import { DayShift } from "./day-shift";
+import { WeatherLine } from "./weather";
 import { dayEntries } from "@/lib/timeline";
 import { todayTokyo } from "@/lib/use-tokyo-now";
 
-export function TripPlanner({ trip, person, stay }: { trip: TripData; person: PersonKey; stay: StayData | null }) {
-  // Today's date only picks which day the timeline opens on. The page itself always
-  // starts at the very top so the trip name and flights are the first thing seen.
+// The whole trip, one day at a time. Opens on the day asked for, else today.
+export function TripPlanner({ trip, person, stay, forecast, initialDayId }: { trip: TripData; person: PersonKey; stay: StayData | null; forecast: ForecastByDate; initialDayId: string | null }) {
+  const asked = trip.days.findIndex((d) => d.id === initialDayId);
   const today = trip.days.findIndex((d) => d.date === todayTokyo());
-  const [index, setIndex] = useState(Math.max(0, today));
+  const [index, setIndex] = useState(Math.max(0, asked >= 0 ? asked : today));
   // Which way the last day change went, so the new day slides in from that side.
   // null on first render: the page entrance already covers that.
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
   const goTo = (target: number) => { if (target === index) return; setDirection(target > index ? "next" : "prev"); setIndex(target); };
 
   const day = trip.days[index];
-  const dates = `${shortThaiDate(trip.startDate)} – ${shortThaiDate(trip.endDate)}`;
   const entries = useMemo(() => (day ? dayEntries(trip, day) : []), [trip, day]);
 
   return <main className="shell">
     {/* The bottom bar stays outside the animated wrapper: see .page-enter. */}
     <div className="page-enter">
-    <AppHeader name={trip.name} dates={dates} person={person} />
-    <FlightCard outbound={trip.outbound} inbound={trip.inbound}/>
-    <ChecklistButton person={person} />
+    <p className="eyebrow">Itinerary</p>
+    <h1 className="text-2xl font-bold">แผนเที่ยว</h1>
     {day ? <>
       <section className="day-control sticky z-20 mt-4 p-3 sm:p-4" aria-label="เลือกวัน">
         <div className="flex items-center gap-2">
@@ -41,9 +40,10 @@ export function TripPlanner({ trip, person, stay }: { trip: TripData; person: Pe
       </section>
       <div key={day.id} className="day-enter" data-dir={direction ?? undefined}>
       <div className="mt-5 flex items-end justify-between">
-        <div><p className="eyebrow">Day {index + 1}</p><h2 className="mt-1 text-[1.45rem] font-bold tracking-tight">{day.title}</h2></div>
+        <div><p className="eyebrow">Day {index + 1}</p><h2 className="mt-1 text-[1.45rem] font-bold tracking-tight">{day.title}</h2><WeatherLine forecast={forecast[day.date]}/></div>
         <p className="rounded-full bg-[var(--card)] px-3 py-1.5 text-xs font-medium text-[var(--ink)]">{entries.length} กิจกรรม</p>
       </div>
+      {person === OWNER && <div className="mt-3"><DayShift day={day} compact/></div>}
       <Timeline date={day.date} entries={entries} />
       </div>
     </> : <p>ยังไม่มีวันเดินทาง</p>}

@@ -17,7 +17,7 @@ Without `DATABASE_URL`, the app runs with read-only demo data so the UI can be p
 Opening any page first asks who you are (`/login`). Picking a name from
 `lib/people.ts` sets a cookie for a year; `proxy.ts` sends anyone without it back to
 the picker. For most people there is no password — it only tells each page whose
-checklist and hotel to show. Switch person from the top-right menu.
+checklist and hotel to show. Switch person from the settings page (`/settings`).
 
 โชกุน (`OWNER` in `lib/people.ts`) is the only one who can change the trip: the
 `/manage` pages and every action in `app/actions.ts` refuse anyone else. Picking
@@ -43,6 +43,18 @@ the others). Setup steps for the phone, in Thai: `widgets/README.md`.
 
 The trip has one shared hotel (`/manage/stay`). Anyone with a row in `PersonStay`
 sees their own hotel instead, editable on the same page.
+
+## Polls and the wheel
+
+`/vote` is for group decisions: anyone can open a poll, everyone votes once by secret
+ballot and may change their mind until whoever opened it (or โชกุน) closes it. While
+a poll is open the server sends each person only their own vote; the counts appear
+once it is closed, and closed polls stay on the page as the record of what was decided. `/wheel` spins a wheel over any list of
+choices; it keeps nothing on the server, and a tied poll can hand its options to it.
+
+The poll tables are `Poll`, `PollOption` and `PollVote` in `prisma/schema.prisma`, so
+adding this feature means running `npm run db:push` against the production database
+after deploying, or the vote page will report that its tables are missing.
 
 ## Packing checklist
 

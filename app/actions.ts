@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { isPerson, personName, OWNER } from "@/lib/people";
 import { isOwner } from "@/lib/session";
 import type { ActionResult } from "@/lib/types";
+import { shiftedTimes } from "@/lib/timeline";
 
 const optionalUrl = z.union([z.literal(""), z.url({ protocol: /^https?$/ })]);
 const optionalDate = z.union([z.literal(""), z.iso.date()]);
@@ -99,4 +100,52 @@ export async function saveDayTitle(formData: FormData) {
 
 export async function deleteActivity(id: string) {
   return run(async () => { await db.activity.delete({ where: { id: z.string().min(1).parse(id) } }); });
+}
+
+const idPair = z.tuple([z.string().min(1), z.string().min(1)]).refine(([a, b]) => a !== b);
+
+// Two activities trade places by trading their time; sortOrder goes with it so a pair
+// booked at the same time still visibly swaps.
+export async function swapActivities(firstId: string, secondId: string) {
+  return run(async () => {
+    const ids = idPair.parse([firstId, secondId]);
+    await db.$transaction(async (tx) => {
+      const rows = await tx.activity.findMany({ where: { id: { in: ids } }, select: { id: true, tripDayId: true, time: true, sortOrder: true } });
+      const [a, b] = ids.map((id) => rows.find((row) => row.id === id));
+      if (!a || !b) throw new Error("ไม่พบกิจกรรมที่จะสลับ อาจถูกลบไปแล้ว");
+      if (a.tripDayId !== b.tripDayId) throw new Error("สลับได้เฉพาะกิจกรรมในวันเดียวกัน");
+      await tx.activity.update({ where: { id: a.id }, data: { time: b.time, sortOrder: b.sortOrder } });
+      await tx.activity.update({ where: { id: b.id }, data: { time: a.time, sortOrder: a.sortOrder } });
+    });
+  });
+}
+
+// The day's order is the timeline's: by time, then by the tie-break sortOrder.
+export async function shiftActivities(dayId: string, fromId: string, minutes: number) {
+  return run(async () => {
+    const data = z.object({ dayId: z.string().min(1), fromId: z.string().min(1), minutes: z.number().int().min(-720).max(720).refine((m) => m !== 0) }).parse({ dayId, fromId, minutes });
+    await db.$transaction(async (tx) => {
+      const rows = await tx.activity.findMany({ where: { tripDayId: data.dayId }, orderBy: [{ time: "asc" }, { sortOrder: "asc" }], select: { id: true, time: true } });
+      const shift = shiftedTimes(rows, data.fromId, data.minutes);
+      if (!shift.ok) throw new Error(shift.message);
+      for (const m of shift.moved) await tx.activity.update({ where: { id: m.id }, data: { time: m.to } });
+    });
+  });
+}
+
+// Two days trade their whole plan: every activity and the day's title. Flights are
+// not part of a day's plan — they are pinned to the trip's dates — so they stay put.
+export async function swapDays(firstId: string, secondId: string) {
+  return run(async () => {
+    const ids = idPair.parse([firstId, secondId]);
+    await db.$transaction(async (tx) => {
+      const rows = await tx.tripDay.findMany({ where: { id: { in: ids } }, select: { id: true, tripId: true, title: true, activities: { select: { id: true } } } });
+      const [a, b] = ids.map((id) => rows.find((row) => row.id === id));
+      if (!a || !b || a.tripId !== b.tripId) throw new Error("ไม่พบวันที่จะสลับ");
+      await tx.activity.updateMany({ where: { id: { in: a.activities.map((x) => x.id) } }, data: { tripDayId: b.id } });
+      await tx.activity.updateMany({ where: { id: { in: b.activities.map((x) => x.id) } }, data: { tripDayId: a.id } });
+      await tx.tripDay.update({ where: { id: a.id }, data: { title: b.title } });
+      await tx.tripDay.update({ where: { id: b.id }, data: { title: a.title } });
+    });
+  });
 }

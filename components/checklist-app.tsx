@@ -5,8 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { personName, personOf, type PersonKey } from "@/lib/people";
 import { alertError, chooseAction, confirmAction, promptText, rowAction } from "@/lib/alerts";
 import type { PackingCategoryData, PackingItemData } from "@/lib/types";
-import { readOpenCategories, writeOpenCategories } from "@/lib/checklist-store";
+import { readLastChecklist, readOpenCategories, writeLastChecklist, writeOpenCategories } from "@/lib/checklist-store";
 import { addCategory, addItem, clearChecks, loadChecklist, removeCategory, removeItem, renameCategory, renameItem, resetChecklist, setItemChecked } from "@/app/checklist/actions";
+import { Field } from "./field";
 
 const countOf = (categories: PackingCategoryData[]) => {
   const items = categories.flatMap((c) => c.items);
@@ -36,8 +37,16 @@ export function ChecklistApp({ person }: { person: PersonKey }) {
         setFailure(null);
         setLoaded({ person, categories: result.categories, saved: result.saved });
         setOpen(readOpenCategories(person));
+        writeLastChecklist(person, result.categories);
       })
-      .catch(() => { if (current) setFailure({ person, message: "เชื่อมต่อไม่สำเร็จ" }); });
+      .catch(() => {
+        if (!current) return;
+        // No connection: the list from the last visit still shows, read-only in effect
+        // since every edit needs the server and will be rolled back.
+        const last = readLastChecklist(person);
+        if (last) { setFailure(null); setLoaded({ person, categories: last, saved: true }); setOpen(readOpenCategories(person)); }
+        else setFailure({ person, message: "เชื่อมต่อไม่สำเร็จ" });
+      });
     return () => { current = false; };
   }, [person, attempt]);
 
@@ -228,7 +237,7 @@ function PageHeader({ onMenu }: { onMenu?: () => void }) {
 function AddRow({ placeholder, onSubmit, onCancel }: { placeholder: string; onSubmit: (name: string) => void; onCancel: () => void }) {
   const [value, setValue] = useState("");
   return <form className="flex items-center gap-2 px-2 py-1" onSubmit={(e) => { e.preventDefault(); const name = value.trim(); if (name) onSubmit(name); }}>
-    <input autoFocus value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} maxLength={80} className="field min-h-[42px] flex-1 text-[.95rem]" aria-label={placeholder} />
+    <Field autoFocus value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} maxLength={80} className="min-h-[42px] text-[.95rem]" wrapClassName="flex-1" aria-label={placeholder} />
     <button type="submit" className="tap grid w-12 place-items-center rounded-xl bg-[var(--ink)] text-[var(--on-dark)]" aria-label="เพิ่ม"><Plus size={20} /></button>
     <button type="button" onClick={onCancel} className="tap grid w-12 place-items-center rounded-xl border border-[var(--line)] text-[var(--muted)]" aria-label="ยกเลิก"><X size={20} /></button>
   </form>;

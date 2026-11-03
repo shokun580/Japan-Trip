@@ -2,6 +2,7 @@
 import { CircleAlert, CircleCheck, TriangleAlert } from "lucide-react";
 import { createElement, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
+import { Field } from "./field";
 
 // The app's own dialogs and toasts. lib/alerts.ts is the only caller: it describes a
 // dialog and awaits the answer, so components ask "are you sure?" in one line and
@@ -180,9 +181,8 @@ function Dialog({ entry, active }: { entry: Entry; active: boolean }) {
       <h2 id={titleId} className="text-[1.2rem] leading-snug font-semibold">{entry.title}</h2>
       {entry.text && <p id={textId} className="mt-1.5 text-[.95rem] leading-relaxed text-[var(--muted)]">{entry.text}</p>}
       {entry.input && <div className="mt-4 text-left">
-        <input
+        <Field
           autoFocus
-          className="field"
           value={text}
           onChange={(event) => { setText(event.target.value); setProblem(undefined); }}
           onFocus={(event) => event.currentTarget.select()}

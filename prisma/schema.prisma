@@ -106,3 +106,40 @@ model PackingItem {
 
   @@index([categoryId, sortOrder])
 }
+
+// Group decisions. Anyone may open a poll and everyone votes once, changing their
+// mind freely until the poll is closed; a closed poll stays as the record of what the
+// group decided. `person` keys come from lib/people, like the checklist rows.
+model Poll {
+  id        String       @id @default(cuid())
+  question  String
+  createdBy String
+  closedAt  DateTime?
+  options   PollOption[]
+  votes     PollVote[]
+  createdAt DateTime     @default(now())
+
+  @@index([createdAt])
+}
+
+model PollOption {
+  id        String     @id @default(cuid())
+  pollId    String
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  label     String
+  sortOrder Int
+  votes     PollVote[]
+
+  @@index([pollId, sortOrder])
+}
+
+model PollVote {
+  pollId    String
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  person    String
+  optionId  String
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  updatedAt DateTime   @updatedAt
+
+  @@id([pollId, person])
+}

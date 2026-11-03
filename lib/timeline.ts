@@ -3,6 +3,20 @@ import type { ActivityData, DayData, TripData } from "./types";
 const JAPAN_MINUTES_AHEAD_OF_THAILAND = 120;
 
 export const toMinutes = (time: string) => { const [h, m] = time.split(":").map(Number); return h * 60 + m; };
+export const fromMinutes = (minutes: number) => `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+const LAST_MINUTE = 23 * 60 + 59;
+
+// Running late (or early): the activity picked and every one after it in the day's
+// order move by the same amount, so the rest of the day keeps its gaps. Returns the
+// new time for each, or the ones that would cross midnight — a plan that wraps round
+// to the next morning is wrong, not late.
+export function shiftedTimes(activities: { id: string; time: string }[], fromId: string, minutes: number) {
+  const start = activities.findIndex((a) => a.id === fromId);
+  if (start < 0) return { ok: false as const, message: "ไม่พบกิจกรรมที่จะเริ่มเลื่อน" };
+  const moved = activities.slice(start).map((a) => ({ id: a.id, from: a.time, at: toMinutes(a.time) + minutes }));
+  if (moved.some((m) => m.at < 0 || m.at > LAST_MINUTE)) return { ok: false as const, message: minutes > 0 ? "เลื่อนแล้วจะเลยเที่ยงคืน ลองลดเวลาลง" : "เลื่อนแล้วจะย้อนไปก่อนเที่ยงคืนของเมื่อวาน" };
+  return { ok: true as const, moved: moved.map((m) => ({ id: m.id, from: m.from, to: fromMinutes(m.at) })) };
+}
 
 // Each leg departs from its own country, so its takeoff time is read in that
 // country's zone: Thailand for the way out, Japan for the way home.
@@ -55,4 +69,16 @@ export function dayEntries(trip: TripData, day: DayData): TimelineEntry[] {
     entries.push({ kind: "flight", id: `flight-${direction}`, time: data.takeoffTime, label, landingTime: data.landingTime, minutes: data.landingTime ? flightMinutes(data.takeoffTime, data.landingTime, direction) : null });
   }
   return entries.sort((a, b) => toMinutes(a.time) - toMinutes(b.time));
+}
+
+// What swapActivities will make of the list, shown before the server answers: the two
+// trade times and places, and everything else — flights included — stays put.
+export function swapEntries(entries: TimelineEntry[], firstId: string, secondId: string): TimelineEntry[] {
+  const i = entries.findIndex((e) => e.id === firstId), j = entries.findIndex((e) => e.id === secondId);
+  const first = entries[i], second = entries[j];
+  if (first?.kind !== "activity" || second?.kind !== "activity") return entries;
+  const next = [...entries];
+  next[i] = { ...second, time: first.time, activity: { ...second.activity, time: first.time, sortOrder: first.activity.sortOrder } };
+  next[j] = { ...first, time: second.time, activity: { ...first.activity, time: second.time, sortOrder: second.activity.sortOrder } };
+  return next;
 }
