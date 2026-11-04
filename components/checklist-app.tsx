@@ -1,21 +1,32 @@
 "use client";
 import Link from "next/link";
-import { Check, ChevronDown, ChevronLeft, ChevronsDownUp, ChevronsUpDown, MoreVertical, Plus, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { ArrowUpDown, Check, ChevronDown, ChevronLeft, ChevronsDownUp, ChevronsUpDown, MoreVertical, Plus, X } from "lucide-react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { personName, personOf, type PersonKey } from "@/lib/people";
 import { alertError, chooseAction, confirmAction, promptText, rowAction } from "@/lib/alerts";
 import type { PackingCategoryData, PackingItemData } from "@/lib/types";
 import { readLastChecklist, readOpenCategories, writeLastChecklist, writeOpenCategories } from "@/lib/checklist-store";
-import { addCategory, addItem, clearChecks, loadChecklist, removeCategory, removeItem, renameCategory, renameItem, resetChecklist, setItemChecked } from "@/app/checklist/actions";
+import { addCategory, addItem, clearChecks, loadChecklist, removeCategory, removeItem, renameCategory, renameItem, reorderCategories, reorderItems, resetChecklist, setItemChecked } from "@/app/checklist/actions";
 import { Field } from "./field";
 import { BottomNav } from "./bottom-nav";
 import type { NavData } from "@/lib/nav";
 import { reach } from "@/lib/reach";
+import { useDragSwap } from "@/lib/use-drag-swap";
 
 const countOf = (categories: PackingCategoryData[]) => {
   const items = categories.flatMap((c) => c.items);
   return { done: items.filter((i) => i.checked).length, total: items.length };
 };
+
+// The drag hook reports which row was dropped on which. A checklist moves the row into
+// that place rather than swapping the two, so everything in between shifts by one.
+function moved<T extends { id: string }>(list: T[], from: string, to: string) {
+  const i = list.findIndex((x) => x.id === from), j = list.findIndex((x) => x.id === to);
+  if (i < 0 || j < 0) return list;
+  const next = [...list];
+  next.splice(j, 0, ...next.splice(i, 1));
+  return next;
+}
 
 export function ChecklistApp({ person, nav }: { person: PersonKey; nav: NavData }) {
   // Keyed by person so switching shows the loader instead of the previous list.
@@ -108,6 +119,16 @@ export function ChecklistApp({ person, nav }: { person: PersonKey; nav: NavData 
     }
   }
 
+  async function moveItem(category: PackingCategoryData, from: string, to: string) {
+    const items = moved(category.items, from, to);
+    await commit(mapCategory(category.id, (c) => ({ ...c, items })), () => reorderItems(category.id, items.map((i) => i.id)));
+  }
+
+  async function moveCategory(from: string, to: string) {
+    const next = moved(categories ?? [], from, to);
+    await commit(next, () => reorderCategories(person, next.map((c) => c.id)));
+  }
+
   async function createCategory() {
     const name = await promptText("หมวดหมู่ใหม่", "", "เช่น ของฝาก");
     if (!name) return;
@@ -183,47 +204,49 @@ export function ChecklistApp({ person, nav }: { person: PersonKey; nav: NavData 
         <div className="meter mt-2.5"><span style={{ width: `${total.total ? (total.done / total.total) * 100 : 0}%` }} /></div>
       </section>
 
-      {categories.length > 0 && <div className="mt-4 flex justify-end">
-        <button onClick={() => setAllOpen(allOpen ? [] : categories.map((c) => c.id))} className="flex items-center gap-1.5 rounded-lg px-1 py-1.5 text-[.85rem] font-medium text-[var(--muted)]">
+      {categories.length > 0 && <div className="mt-4 flex items-center justify-between gap-3">
+        <p className="flex min-w-0 items-center gap-1.5 text-[.85rem] text-[var(--muted)]"><ArrowUpDown size={15} className="shrink-0" />กดค้างแล้วลากเพื่อเลื่อนลำดับ</p>
+        <button onClick={() => setAllOpen(allOpen ? [] : categories.map((c) => c.id))} className="flex shrink-0 items-center gap-1.5 rounded-lg px-1 py-1.5 text-[.85rem] font-medium text-[var(--muted)]">
           {allOpen ? <ChevronsDownUp size={17} /> : <ChevronsUpDown size={17} />}{allOpen ? "พับทั้งหมด" : "กางทั้งหมด"}
         </button>
       </div>}
 
-      <div className="mt-2 space-y-3">
-        {categories.map((category) => {
-          const count = countOf([category]);
-          const expanded = open.includes(category.id);
-          return <section key={category.id} className="card overflow-hidden">
-            <div className="flex items-stretch">
-              <button onClick={() => toggleOpen(category.id)} aria-expanded={expanded} className="flex min-w-0 flex-1 items-center gap-3 p-4 text-left">
-                <ChevronDown size={20} className={`shrink-0 text-[var(--muted)] transition-transform duration-200 ${expanded ? "" : "-rotate-90"}`} />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-semibold">{category.name}</span>
-                  {count.done > 0 && <span className="meter mt-1.5"><span style={{ width: `${(count.done / count.total) * 100}%` }} /></span>}
-                </span>
-                <span className="shrink-0 rounded-full bg-[var(--paper)] px-2.5 py-1 text-[.78rem] font-semibold text-[var(--ink)]">{count.done}/{count.total}</span>
-              </button>
-              <button onClick={() => void editCategory(category)} aria-label={`จัดการหมวด ${category.name}`} className="tap grid shrink-0 place-items-center px-1 text-[var(--muted)]"><MoreVertical size={19} /></button>
+      <DragList ids={categories.map((c) => c.id)} onMove={(from, to) => void moveCategory(from, to)} className="mt-2 space-y-3">{(groups) => categories.map((category) => {
+        const count = countOf([category]);
+        const expanded = open.includes(category.id);
+        const lift = groups.row(category.id);
+        // Only the header picks a category up: a press on one of its items belongs to
+        // that item's own list.
+        return <li key={category.id} {...lift} onPointerDown={(event) => { if ((event.target as Element).closest("[data-pack-head]")) lift.onPointerDown(event); }} className="card pack-card swap-row overflow-hidden" data-lifted={category.id === groups.lifted} data-over={category.id === groups.over}>
+          <div data-pack-head className="flex items-stretch">
+            <button {...groups.keys(category.id)} onClick={() => toggleOpen(category.id)} aria-expanded={expanded} className="flex min-w-0 flex-1 items-center gap-3 p-4 text-left">
+              <ChevronDown size={20} className={`shrink-0 text-[var(--muted)] transition-transform duration-200 ${expanded ? "" : "-rotate-90"}`} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold">{category.name}</span>
+                {count.done > 0 && <span className="meter mt-1.5"><span style={{ width: `${(count.done / count.total) * 100}%` }} /></span>}
+              </span>
+              <span className="shrink-0 rounded-full bg-[var(--paper)] px-2.5 py-1 text-[.78rem] font-semibold text-[var(--ink)]">{count.done}/{count.total}</span>
+            </button>
+            <button onClick={() => void editCategory(category)} aria-label={`จัดการหมวด ${category.name}`} className="tap grid shrink-0 place-items-center px-1 text-[var(--muted)]"><MoreVertical size={19} /></button>
+          </div>
+
+          <div className="reveal" data-open={expanded}><div>
+            <div className="border-t border-[var(--line)] px-2 pb-2">
+              <DragList ids={category.items.map((i) => i.id)} onMove={(from, to) => void moveItem(category, from, to)}>{(rows) => category.items.map((item) => <li key={item.id} {...rows.row(item.id)} className="swap-row pack-row flex items-stretch" data-lifted={item.id === rows.lifted} data-over={item.id === rows.over}>
+                <button {...rows.keys(item.id)} onClick={() => void toggleItem(category, item)} role="checkbox" aria-checked={item.checked} data-checked={item.checked} className="check-row tap flex min-w-0 flex-1 items-center gap-3 px-2 text-left">
+                  <span className="check" data-checked={item.checked}><Check size={18} strokeWidth={3.5} /></span>
+                  <span className="check-label min-w-0 flex-1 py-2 text-[.97rem] transition-colors">{item.name}</span>
+                </button>
+                <button onClick={() => void editItem(category, item)} aria-label={`จัดการ ${item.name}`} className="tap grid shrink-0 place-items-center px-1 text-[var(--muted)]"><MoreVertical size={17} /></button>
+              </li>)}</DragList>
+
+              {adding === category.id
+                ? <AddRow placeholder="ชื่อของที่จะเพิ่ม" onCancel={() => setAdding(null)} onSubmit={(name) => { setAdding(null); void createItem(category, name); }} />
+                : <button onClick={() => setAdding(category.id)} className="tap flex w-full items-center gap-2 px-2 text-[.92rem] font-medium text-[var(--muted)]"><Plus size={18} />เพิ่มของในหมวดนี้</button>}
             </div>
-
-            <div className="reveal" data-open={expanded}><div>
-              <div className="border-t border-[var(--line)] px-2 pb-2">
-                {category.items.map((item) => <div key={item.id} className="flex items-stretch">
-                  <button onClick={() => void toggleItem(category, item)} role="checkbox" aria-checked={item.checked} data-checked={item.checked} className="check-row tap flex min-w-0 flex-1 items-center gap-3 px-2 text-left">
-                    <span className="check" data-checked={item.checked}><Check size={18} strokeWidth={3.5} /></span>
-                    <span className="check-label min-w-0 flex-1 py-2 text-[.97rem] transition-colors">{item.name}</span>
-                  </button>
-                  <button onClick={() => void editItem(category, item)} aria-label={`จัดการ ${item.name}`} className="tap grid shrink-0 place-items-center px-1 text-[var(--muted)]"><MoreVertical size={17} /></button>
-                </div>)}
-
-                {adding === category.id
-                  ? <AddRow placeholder="ชื่อของที่จะเพิ่ม" onCancel={() => setAdding(null)} onSubmit={(name) => { setAdding(null); void createItem(category, name); }} />
-                  : <button onClick={() => setAdding(category.id)} className="tap flex w-full items-center gap-2 px-2 text-[.92rem] font-medium text-[var(--muted)]"><Plus size={18} />เพิ่มของในหมวดนี้</button>}
-              </div>
-            </div></div>
-          </section>;
-        })}
-      </div>
+          </div></div>
+        </li>;
+      })}</DragList>
 
       <button onClick={() => void createCategory()} className="tap mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--line-strong)] text-[.95rem] font-medium text-[var(--muted)]"><Plus size={19} />เพิ่มหมวดหมู่</button>
     </>}
@@ -236,6 +259,14 @@ function PageHeader({ onMenu }: { onMenu?: () => void }) {
     <Link href="/" className="tap -ml-2 flex items-center gap-1 rounded-xl px-2 font-medium text-[var(--ink)]"><ChevronLeft size={22} />กลับ</Link>
     {onMenu && <button onClick={onMenu} aria-label="จัดการเช็คลิสต์" className="tap grid place-items-center rounded-2xl border border-[var(--line)] bg-[var(--card)] shadow-sm"><MoreVertical size={24} /></button>}
   </header>;
+}
+
+// useDragSwap only takes hold of a list that is on the page when it mounts, so each
+// list that can be rearranged gets a component of its own that mounts with it.
+type Drag = Omit<ReturnType<typeof useDragSwap>, "list">;
+function DragList({ ids, onMove, className, children }: { ids: string[]; onMove: (from: string, to: string) => void; className?: string; children: (drag: Drag) => ReactNode }) {
+  const { list, lifted, over, row, keys } = useDragSwap(ids.join(), onMove);
+  return <ul ref={list} className={className}>{children({ lifted, over, row, keys })}</ul>;
 }
 
 function AddRow({ placeholder, onSubmit, onCancel }: { placeholder: string; onSubmit: (name: string) => void; onCancel: () => void }) {

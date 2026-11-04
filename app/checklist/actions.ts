@@ -119,6 +119,25 @@ export async function removeCategory(categoryId: string): Promise<ActionResult> 
   return run(async () => { await db.packingCategory.delete({ where: { id: rowId.parse(categoryId) } }); });
 }
 
+// A reorder sends the whole list in its new order, and each row's place in it becomes
+// its sortOrder. Rows are matched under their parent as well, so an id from some
+// other list is simply left alone.
+const order = z.array(rowId).max(500);
+
+export async function reorderItems(categoryId: string, itemIds: string[]): Promise<ActionResult> {
+  return run(async () => {
+    const id = rowId.parse(categoryId), ids = order.parse(itemIds);
+    await db.$transaction(ids.map((item, sortOrder) => db.packingItem.updateMany({ where: { id: item, categoryId: id }, data: { sortOrder } })));
+  });
+}
+
+export async function reorderCategories(person: string, categoryIds: string[]): Promise<ActionResult> {
+  return run(async () => {
+    const key = personId.parse(person), ids = order.parse(categoryIds);
+    await db.$transaction(ids.map((category, sortOrder) => db.packingCategory.updateMany({ where: { id: category, person: key }, data: { sortOrder } })));
+  });
+}
+
 export async function clearChecks(person: string): Promise<ActionResult> {
   return run(async () => {
     const key = personId.parse(person);
