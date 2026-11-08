@@ -1,5 +1,5 @@
 import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudRainWind, CloudSun, Snowflake, Sun, type LucideIcon } from "lucide-react";
-import { dayLabel } from "@/lib/format";
+import { dayLabel, thaiWeekday } from "@/lib/format";
 import type { DayData } from "@/lib/types";
 import type { Forecast, ForecastByDate } from "@/lib/weather";
 
@@ -35,8 +35,9 @@ export function WeatherStrip({ days, forecast, today }: { days: DayData[]; forec
     <ul className="slider mt-2 -mx-1 flex gap-2 px-1">{shown.map((d) => {
       const f = forecast[d.date], { label, Icon } = describe(f.code);
       const isToday = d.date === today;
-      return <li key={d.id} className={`flex w-[74px] shrink-0 flex-col items-center rounded-2xl border px-1.5 py-1 text-center ${isToday ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--on-dark)]" : "border-[var(--line)]"}`} aria-label={`${dayLabel(d.date)} ${label} สูงสุด ${f.high} ต่ำสุด ${f.low} โอกาสฝน ${f.rain}%`}>
-        <span className="text-[.78rem] font-medium">{isToday ? "วันนี้" : dayLabel(d.date)}</span>
+      const weekday = thaiWeekday(d.date);
+      return <li key={d.id} className={`flex w-[74px] shrink-0 flex-col items-center rounded-2xl border px-1.5 py-1 text-center ${isToday ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--on-dark)]" : "border-[var(--line)]"}`} aria-label={`${weekday.name} ${dayLabel(d.date)} ${label} สูงสุด ${f.high} ต่ำสุด ${f.low} โอกาสฝน ${f.rain}%`}>
+        <span className="inline-flex items-center gap-2 text-[.78rem] font-medium"><span className="h-3 w-3 shrink-0 rounded-full" style={{ background: weekday.color, boxShadow: `0 0 0 3px color-mix(in srgb, ${weekday.color} 30%, transparent)` }} title={weekday.name} aria-hidden/>{isToday ? "วันนี้" : dayLabel(d.date)}</span>
         <Icon size={22} className="my-0.5" aria-hidden/>
         <span className="text-[.95rem] font-semibold tabular-nums">{f.high}°<span className={`font-normal ${isToday ? "text-[var(--on-dark-soft)]" : "text-[var(--muted)]"}`}>/{f.low}°</span></span>
         <span className={`mt-0.5 text-[.72rem] ${isToday ? "text-[var(--on-dark-soft)]" : "text-[var(--muted)]"}`}>{f.rain >= 30 ? `ฝน ${f.rain}%` : label}</span>
