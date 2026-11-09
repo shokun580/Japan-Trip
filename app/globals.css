@@ -43,7 +43,7 @@
   --deep: var(--ink);
   /* Light on glass: real white, not a palette role, since a dark theme turns the
      palette's light colours dark and a highlight must stay a highlight. */
-  --glass-hi: rgb(255 255 255 / .55);
+  --glass-hi: rgb(255 255 255 / .38);
   --glass-edge: rgb(255 255 255 / .28);
   --glass-tint: rgb(255 255 255 / .1);
 
@@ -258,19 +258,39 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 /* The glass carries its own light — a bright rim, a sheen across the top and a slow
    sweep — so it reads as glass on the fixed home page too, where nothing scrolls
    behind it to blur. */
-.nav-bar { --spring: cubic-bezier(.34, 1.56, .64, 1); position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); left: 12px; z-index: 40; isolation: isolate; display: grid; overflow: visible; width: min(100% - 24px, 520px); margin-inline: auto; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 8px 6px; border: 1px solid var(--glass-edge); border-radius: 30px; background: linear-gradient(180deg, var(--glass-tint), transparent 60%), color-mix(in srgb, var(--card) 58%, transparent); box-shadow: 0 18px 44px color-mix(in srgb, var(--deep) 30%, transparent), inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 color-mix(in srgb, var(--deep) 18%, transparent), inset 0 0 22px var(--glass-tint); backdrop-filter: blur(26px) saturate(1.9); -webkit-backdrop-filter: blur(26px) saturate(1.9); animation: nav-rise .5s var(--ease-out) backwards; }
+.nav-bar { --spring: cubic-bezier(.34, 1.56, .64, 1); position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); left: 12px; z-index: 40; isolation: isolate; display: grid; overflow: visible; width: min(100% - 24px, 520px); margin-inline: auto; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 8px 6px; border: 1px solid transparent; border-radius: 30px; animation: nav-rise .5s var(--ease-out) backwards; }
+/* The frosting is a layer of its own, not the bar: a filter on the bar would wall off
+   everything inside it from the page, and the lens has to see what it passes over. */
+.nav-frost { position: absolute; inset: -1px; z-index: -2; border: 1px solid var(--glass-edge); border-radius: inherit; background: linear-gradient(180deg, var(--glass-tint), transparent 60%), color-mix(in srgb, var(--card) 58%, transparent); box-shadow: 0 18px 44px color-mix(in srgb, var(--deep) 30%, transparent), inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 color-mix(in srgb, var(--deep) 18%, transparent), inset 0 0 22px var(--glass-tint); backdrop-filter: blur(26px) saturate(1.9); }
 .nav-bar::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: radial-gradient(120% 160% at 12% -40%, var(--glass-hi), transparent 46%), radial-gradient(90% 140% at 100% 140%, var(--glass-tint), transparent 55%); opacity: .55; pointer-events: none; }
 .nav-bar::after { content: ""; position: absolute; inset: 0; z-index: -1; overflow: hidden; border-radius: inherit; background: linear-gradient(105deg, transparent 35%, var(--glass-tint) 45%, var(--glass-edge) 50%, var(--glass-tint) 55%, transparent 65%) no-repeat; background-size: 250% 100%; animation: nav-sheen 7s ease-in-out infinite; pointer-events: none; }
 @keyframes nav-sheen { 0%, 55% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
-@keyframes nav-rise { from { opacity: 0; transform: translateY(18px); } }
-.nav-item { position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 56px; padding: 8px 0 6px; border: 0; border-radius: 20px; background: none; color: var(--muted); font-size: .68rem; font-weight: 500; -webkit-tap-highlight-color: transparent; }
+/* Slides up from below the screen. No fade: any opacity on the bar would cut the frosting off from the page until it finished. */
+@keyframes nav-rise { from { transform: translateY(calc(100% + 30px + env(safe-area-inset-bottom))); } }
+.nav-item { position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 56px; padding: 8px 0 6px; border: 0; border-radius: 20px; background: none; color: var(--muted); font-size: .68rem; font-weight: 500; -webkit-tap-highlight-color: transparent; transition: transform .12s ease, color .2s ease; }
 .nav-item > svg, .nav-item > span:first-child { transition: transform .4s var(--spring), color .2s ease; }
-.nav-item:active > svg, .nav-item:active > span:first-child { transform: scale(.82); transition-duration: .1s; }
-.nav-item[aria-current="page"] { color: var(--ink); }
-.nav-item[aria-current="page"] > svg, .nav-item[aria-current="page"] > span:first-child { color: var(--accent); transform: scale(1.06); }
-/* The active slot is a lens of glass inside the glass: lit rim, a soft tint of the
-   theme, a little depth at its foot. */
-.nav-item[aria-current="page"]::before { content: ""; position: absolute; inset: 0 2px; z-index: -1; border: 1px solid var(--glass-edge); border-radius: 20px; background: linear-gradient(180deg, var(--glass-tint), transparent 70%), color-mix(in srgb, var(--sky) 42%, transparent); box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -8px 14px color-mix(in srgb, var(--deep) 10%, transparent), 0 4px 12px color-mix(in srgb, var(--deep) 14%, transparent); backdrop-filter: blur(10px) saturate(2); -webkit-backdrop-filter: blur(10px) saturate(2); animation: nav-pop .45s var(--spring) backwards; }
+.nav-bar:not([data-held="true"]) .nav-item:active > svg, .nav-bar:not([data-held="true"]) .nav-item:active > span:first-child { transform: scale(.82); transition-duration: .1s; }
+.nav-item[data-lit="true"] { color: var(--ink); }
+.nav-item[data-lit="true"] > svg, .nav-item[data-lit="true"] > span:first-child { color: var(--accent); transform: scale(1.06); }
+/* While the glass is held, whatever is under it swells, as if seen through it. */
+.nav-bar[data-held="true"] .nav-item[data-lit="true"] > svg, .nav-bar[data-held="true"] .nav-item[data-lit="true"] > span:first-child { transform: scale(1.24); }
+/* The bar takes sideways drags for the glass and leaves up-and-down to the page. iOS
+   would otherwise offer to preview the link under a held finger. */
+.nav-bar { touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.nav-bar[data-settled="true"], .nav-bar[data-settled="true"] .nav-lens::before { animation: none; }
+/* The active slot wears a lens of glass inside the glass: lit rim, a soft tint of the
+   theme, a little depth at its foot. There is one for the whole bar, exactly one slot
+   wide, and lib/use-glass-lens.ts writes its transform to move it. */
+.nav-lens { position: absolute; top: 8px; bottom: 8px; left: 6px; width: calc((100% - 12px) / 5); pointer-events: none; will-change: transform; transition: opacity .2s ease; }
+.nav-lens[data-hidden="true"] { opacity: 0; }
+.nav-lens::before { content: ""; position: absolute; inset: 0 2px; border: 1px solid var(--glass-edge); border-radius: 20px; background: linear-gradient(180deg, var(--glass-tint), transparent 70%), color-mix(in srgb, var(--sky) 42%, transparent); box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -8px 14px color-mix(in srgb, var(--deep) 10%, transparent), 0 4px 12px color-mix(in srgb, var(--deep) 14%, transparent); backdrop-filter: blur(10px) saturate(2); transition: border-radius .18s ease, box-shadow .18s ease; animation: nav-pop .45s var(--spring) backwards; }
+/* Picked up, it clears and rounds into a pill. What shows in it is whatever it is
+   passing over, only livelier. */
+.nav-bar[data-held="true"] .nav-lens::before { border-radius: 26px; background: linear-gradient(180deg, color-mix(in srgb, var(--glass-hi) 35%, transparent), transparent 28%); box-shadow: inset 0 1px 0 var(--glass-hi), 0 10px 24px color-mix(in srgb, var(--deep) 32%, transparent); backdrop-filter: saturate(1.45); }
+/* Its rim is a thin band that drinks the colour of what lies under it, the way the
+   edge of real glass bends the light, with only a sliver of spectrum at two corners. */
+.nav-lens::after { content: ""; position: absolute; inset: 0 2px; padding: 2.5px; border-radius: 26px; background: conic-gradient(from 270deg, transparent 27%, rgb(255 130 150 / .38) 30%, rgb(255 215 130 / .38) 33%, rgb(140 240 195 / .38) 36%, rgb(120 195 255 / .38) 39%, rgb(185 155 255 / .38) 42%, transparent 46% 77%, rgb(185 155 255 / .38) 80%, rgb(120 195 255 / .38) 83%, rgb(140 240 195 / .38) 86%, rgb(255 215 130 / .38) 89%, rgb(255 130 150 / .38) 92%, transparent 96%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity .18s ease; }
+.nav-bar[data-held="true"] .nav-lens::after { opacity: 1; backdrop-filter: saturate(2.4); }
 @keyframes nav-pop { from { opacity: 0; transform: scale(.6); } }
 .nav-stay { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 56px; padding-bottom: 6px; color: var(--ink); font-size: .68rem; font-weight: 600; text-decoration: none; -webkit-tap-highlight-color: transparent; }
 .nav-stay-button { position: relative; display: grid; width: 60px; height: 60px; margin-top: -30px; place-items: center; border: 4px solid color-mix(in srgb, var(--card) 70%, transparent); outline: 1px solid var(--glass-edge); outline-offset: -1px; border-radius: 999px; background: linear-gradient(145deg, var(--ink), var(--slate)); color: var(--on-dark); box-shadow: 0 12px 28px color-mix(in srgb, var(--deep) 36%, transparent), inset 0 1px 0 color-mix(in srgb, var(--snow) 35%, transparent); transition: transform .4s var(--spring); }
