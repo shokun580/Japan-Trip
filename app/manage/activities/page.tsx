@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTrip } from "@/lib/data";
-import { dayLabel } from "@/lib/format";
+import { dayLabel, readTokyoNow } from "@/lib/format";
+import { getForecastByCity } from "@/lib/weather";
 import { ActivityEditor } from "@/components/activity-editor";
 import { dayEntries } from "@/lib/timeline";
 import { DayTitleField } from "@/components/day-title-field";
@@ -11,6 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ActivitiesPage({ searchParams }: { searchParams: Promise<{ day?: string }> }) {
   const trip = await getTrip();
+  const skies = await getForecastByCity(trip.days);
   const params = await searchParams;
   const selected = trip.days.find((d) => d.id === params.day) ?? trip.days[0];
   const readOnly = !process.env.DATABASE_URL;
@@ -27,7 +29,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
         <p className="eyebrow">{dayLabel(selected.date)}</p>
         {!readOnly && <div className="-mr-2 flex items-center gap-1">
           <DayShift day={selected}/>
-          {trip.days.length > 1 && <DaySwap day={selected} days={trip.days} flightDates={flightDates}/>}
+          {trip.days.length > 1 && <DaySwap day={selected} days={trip.days} flightDates={flightDates} skies={skies} today={readTokyoNow().date}/>}
         </div>}
       </div>
       {readOnly

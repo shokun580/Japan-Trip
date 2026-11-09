@@ -52,7 +52,8 @@ export function Timeline({ date, entries }: { date: string; entries: TimelineEnt
       const bullet = passed === null ? "border-[var(--ink)] bg-[var(--paper)]" : passed ? "border-[var(--accent)] bg-[var(--accent)]" : "border-[var(--line-strong)] bg-[var(--card)]";
       // Hide this row's own time when the "now" label would sit on top of it.
       const timeHidden = markerTop !== null && centers[i] !== undefined && Math.abs(markerTop - centers[i]) < 13;
-      return <li key={entry.id} className="relative grid min-h-[122px] grid-cols-[47px_1fr] gap-8 sm:grid-cols-[56px_1fr] sm:gap-10">
+      // minmax(0, 1fr), not 1fr: a bare 1fr stretches to fit a long pasted link, which made that one card wider than the rest.
+      return <li key={entry.id} className="relative grid min-h-[122px] grid-cols-[47px_minmax(0,1fr)] gap-8 sm:grid-cols-[56px_minmax(0,1fr)] sm:gap-10">
         {/* invisible, not hidden: display:none would drop it out of the grid and let the card fall into the time column. */}
         <time className={`pt-4 text-right text-[.82rem] font-semibold tabular-nums sm:text-sm ${timeHidden ? "invisible" : ""}`}>{entry.time}</time>
         <span data-bullet className={`absolute top-[22px] left-[53px] h-[13px] w-[13px] rounded-full border-[3px] transition-colors sm:left-[66px] ${bullet}`} />
@@ -66,7 +67,7 @@ export function Timeline({ date, entries }: { date: string; entries: TimelineEnt
                 ? <span className="rounded-full bg-[var(--sky)] px-3 py-1.5 text-[.75rem] font-semibold whitespace-nowrap text-[var(--ink)]">อยู่บนเครื่อง {durationLabel(entry.minutes)}</span>
                 : <span className="text-[.8rem] text-[var(--on-dark-soft)]">ยังไม่ได้ระบุเวลาถึง</span>}
             </article>
-          : <article className={`card p-4 ${passed === false ? "opacity-70" : ""}`}><h3 className="text-[1.08rem] font-semibold">{entry.activity.name}</h3>{entry.activity.description && <p className="mt-1.5 text-[.96rem] leading-relaxed text-[var(--muted)]">{entry.activity.description}</p>}{entry.activity.mapUrl && <a className="tap mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--sky)] px-4 py-2 text-[.92rem] font-medium sm:w-auto" href={entry.activity.mapUrl} target="_blank" rel="noopener noreferrer"><MapPinned size={20} />เปิดแผนที่</a>}</article>}
+          : <article className={`card p-4 wrap-anywhere ${passed === false ? "opacity-70" : ""}`}><h3 className="text-[1.08rem] font-semibold">{entry.activity.name}</h3>{entry.activity.description && <p className="mt-1.5 text-[.96rem] leading-relaxed text-[var(--muted)]">{entry.activity.description}</p>}{entry.activity.mapUrl && <a className="tap mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--sky)] px-4 py-2 text-[.92rem] font-medium sm:w-auto" href={entry.activity.mapUrl} target="_blank" rel="noopener noreferrer"><MapPinned size={20} />เปิดแผนที่</a>}</article>}
       </li>;
     })}</ol>
   </section>;

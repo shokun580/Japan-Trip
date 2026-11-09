@@ -6,6 +6,7 @@ import type { DayData } from "./types";
 // the forecast in its HTML and the offline copy still shows the last one seen.
 export type Forecast = { code: number; high: number; low: number; rain: number };
 export type ForecastByDate = Record<string, Forecast>;
+export type ForecastByCity = Partial<Record<City, ForecastByDate>>;
 
 const CITIES = {
   osaka: { lat: 34.69, lon: 135.5 },
@@ -40,16 +41,41 @@ async function fetchCity(city: City): Promise<ForecastByDate> {
   return out;
 }
 
-// One entry per trip day that the forecast reaches (about two weeks out). A failed
-// fetch leaves the map empty rather than failing the page: the weather is a nicety.
-export async function getForecast(days: DayData[]): Promise<ForecastByDate> {
+// The whole forecast of every city the trip's days name. A failed fetch leaves that
+// city out rather than failing the page: the weather is a nicety.
+export async function getForecastByCity(days: DayData[]): Promise<ForecastByCity> {
   const wanted = new Set(days.map((d) => cityOf(d.title)));
-  const byCity = new Map<City, ForecastByDate>();
-  await Promise.all([...wanted].map(async (city) => { try { byCity.set(city, await fetchCity(city)); } catch { /* no forecast for this city today */ } }));
+  const byCity: ForecastByCity = {};
+  await Promise.all([...wanted].map(async (city) => { try { byCity[city] = await fetchCity(city); } catch { /* no forecast for this city today */ } }));
+  return byCity;
+}
+
+// The sky a plan with this title gets on this date, wherever the plan sits now.
+export const skyFor = (byCity: ForecastByCity, title: string, date: string): Forecast | undefined => byCity[cityOf(title)]?.[date];
+
+// One entry per trip day that the forecast reaches (about two weeks out).
+export async function getForecast(days: DayData[]): Promise<ForecastByDate> {
+  const byCity = await getForecastByCity(days);
   const out: ForecastByDate = {};
   for (const day of days) {
-    const forecast = byCity.get(cityOf(day.title))?.[day.date];
+    const forecast = skyFor(byCity, day.title, day.date);
     if (forecast) out[day.date] = forecast;
   }
   return out;
+}
+
+const RAINY = 50, WORTH_MOVING = 30;
+
+// The day to swap with to keep this day's plan out of the rain, if there is one: only
+// when this day looks wet and that date is dry and properly better. Driest first, then
+// nearest. A past day can't take a plan and a flight is pinned to its date, so neither
+// is ever suggested. It only weighs this plan: the other one may well get wetter.
+export function driestSwap(day: DayData, days: DayData[], byCity: ForecastByCity, today: string, flightDates: string[]): DayData | null {
+  const here = skyFor(byCity, day.title, day.date)?.rain;
+  const free = (d: DayData) => d.date >= today && !flightDates.includes(d.date);
+  if (here === undefined || here < RAINY || !free(day)) return null;
+  const rainOn = (d: DayData) => skyFor(byCity, day.title, d.date)?.rain ?? 100;
+  const distance = (d: DayData) => Math.abs(Date.parse(d.date) - Date.parse(day.date));
+  const better = days.filter((d) => d.id !== day.id && free(d) && rainOn(d) < RAINY && here - rainOn(d) >= WORTH_MOVING);
+  return better.sort((a, b) => rainOn(a) - rainOn(b) || distance(a) - distance(b))[0] ?? null;
 }
