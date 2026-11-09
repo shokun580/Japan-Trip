@@ -21,3 +21,5 @@ export type CreateResult = { ok: true; id: string } | { ok: false; message: stri
 // voted for what is never sent. `voted` is how many people have voted so far.
 export type PollOptionData = { id: string; label: string; votes: number | null };
 export type PollData = { id: string; question: string; createdBy: string; createdAt: string; closedAt: string | null; options: PollOptionData[]; myVote: string | null; voted: number };
+// Shared notes. `images` holds ids only; the pictures come from /notes/image/<id>.
+export type NoteData = { id: string; title: string; body: string; createdBy: string; createdAt: string; images: string[] };

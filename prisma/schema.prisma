@@ -144,6 +144,36 @@ model PollVote {
   @@id([pollId, person])
 }
 
+// Shared notes: a title, some text and photos, any of them left out as long as one is
+// there. Anyone may write one and everyone reads them; changing or deleting one is for
+// whoever wrote it, or the owner. `createdBy` is a key from lib/people, like the poll
+// rows.
+model Note {
+  id        String      @id @default(cuid())
+  title     String      @default("")
+  body      String
+  createdBy String
+  images    NoteImage[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([createdAt])
+}
+
+// The photo itself lives in the row, shrunk on the phone first (lib/note-images.ts),
+// in two sizes: `thumb` for the list and `full` for the viewer. The bytes are heavy,
+// so any query that is not serving a picture names the columns it wants.
+model NoteImage {
+  id        String @id @default(cuid())
+  noteId    String
+  note      Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  full      Bytes
+  thumb     Bytes
+  sortOrder Int
+
+  @@index([noteId, sortOrder])
+}
+
 // What each person has chosen for themselves, whichever phone they use: the order
 // of the home page's sections and their colour theme. A row exists only once
 // someone changes something; everyone else gets the defaults (lib/home-layout,

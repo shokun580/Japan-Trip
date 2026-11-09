@@ -394,6 +394,41 @@ html[data-dragging], html[data-dragging] * { cursor: grabbing; }
 .poll-option[data-won="true"] .poll-bar { background: var(--accent-wash); }
 .card[data-closed="true"] { box-shadow: none; }
 .flight-icon[data-tone="accent"] { background: var(--accent); color: var(--snow); }
+/* Notes (components/note-board.tsx) ------------------------------------------- */
+/* Square tiles, cropped: the whole picture is one tap away in the viewer. */
+.note-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.note-grid[data-few="true"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.note-thumb { display: block; overflow: hidden; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 12px; background: var(--line); }
+.note-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* The tap target is the tile's corner; the dot drawn inside it is only 22px. */
+.note-remove { position: absolute; top: 0; right: 0; display: grid; width: 44px; height: 44px; place-items: start end; padding: 4px; border: 0; background: none; color: var(--snow); cursor: pointer; }
+.note-remove > span { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 999px; background: var(--ghost-dark); }
+/* The safe areas too: a tall sheet must not run up under the Dynamic Island. */
+.note-overlay { padding-block: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-bottom)); }
+/* The backdrop stops where the visual viewport does, which on iOS 26 is short of the
+   keyboard's top edge; the shadow dims the strip of page left showing below it. */
+.note-overlay { box-shadow: 0 0 0 100vmax var(--scrim); }
+.note-sheet { display: flex; width: min(100%, 520px); max-height: 100%; flex-direction: column; border-radius: 26px; background: var(--card); box-shadow: 0 24px 60px color-mix(in srgb, var(--deep) 35%, transparent); color: var(--ink); }
+.note-sheet .note-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* .label's size lands a hair under 16px, and iOS zooms the page into any box below that. */
+.note-sheet .field { font-size: 17px; }
+.note-sheet-body { display: grid; flex: 1 1 auto; grid-template-columns: minmax(0, 1fr); gap: 10px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 7px 20px 12px; }
+.note-pick { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line-strong); border-radius: 13px; background: var(--card); font-size: .92rem; font-weight: 500; cursor: pointer; }
+.note-pick:has(input:disabled) { opacity: .4; cursor: default; }
+.note-pick:has(input:focus-visible) { outline: 3px solid var(--slate); outline-offset: 3px; }
+/* Near black on every theme, so the controls are real white: a dark theme turns the
+   palette's snow dark. Each sits on a dark chip to stay visible over a bright photo. */
+.note-viewer { --chip: color-mix(in srgb, black 50%, transparent); position: fixed; inset: 0; z-index: 60; background: color-mix(in srgb, var(--deep) 12%, black); color: white; }
+.note-viewer-track { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior: contain; }
+.note-viewer-track::-webkit-scrollbar { display: none; }
+.note-viewer-slide { display: grid; flex: 0 0 100%; place-items: center; scroll-snap-align: center; }
+.note-viewer-slide img { max-width: 100%; max-height: 100dvh; object-fit: contain; }
+.note-viewer-close { position: absolute; top: calc(8px + env(safe-area-inset-top)); right: 8px; display: grid; place-items: center; border: 0; border-radius: 999px; background: var(--chip); color: inherit; cursor: pointer; }
+/* Centred with calc, not a transform: .tap's press effect would replace the transform. */
+.note-viewer-arrow { position: absolute; top: calc(50% - 24px); display: grid; place-items: center; border: 0; border-radius: 999px; background: var(--chip); color: inherit; cursor: pointer; }
+.note-viewer-arrow[data-side="prev"] { left: 8px; }
+.note-viewer-arrow[data-side="next"] { right: 8px; }
+.note-viewer-count { position: absolute; top: calc(19px + env(safe-area-inset-top)); left: 50%; margin: 0; padding: 3px 11px; transform: translateX(-50%); border-radius: 999px; background: var(--chip); font-size: .9rem; pointer-events: none; }
 /* Decision wheel (components/decision-wheel.tsx) ------------------------------ */
 /* The pointer stays put at the top while the wheel turns under it. transform is
    written by the spin itself, so the wheel has no transition of its own. */

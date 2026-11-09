@@ -10,7 +10,7 @@ import { useEffect, useSyncExternalStore } from "react";
 // Every page anyone might open on the move, so none has to have been visited
 // before the signal goes. The manage pages are left out: changing the trip needs
 // the network anyway.
-const WARM = ["/", "/plan", "/flights", "/checklist", "/vote", "/wheel", "/settings", "/settings/home", "/settings/changelog"];
+const WARM = ["/", "/plan", "/flights", "/checklist", "/vote", "/wheel", "/settings", "/settings/home", "/settings/changelog", "/notes"];
 
 function subscribe(listener: () => void) {
   window.addEventListener("online", listener);

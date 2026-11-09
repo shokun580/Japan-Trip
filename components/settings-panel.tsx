@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ChevronRight, LayoutList, Palette, Sparkles, UserRound } from "lucide-react";
+import { ChevronRight, LayoutList, NotebookPen, Palette, Sparkles, UserRound } from "lucide-react";
 import { useState } from "react";
 import { OWNER, personName, personOf, type PersonKey } from "@/lib/people";
 import { APP_VERSION } from "@/lib/changelog";
@@ -31,6 +31,14 @@ export function SettingsPanel({ person }: { person: PersonKey }) {
       <Link href="/settings/home" className={row}>
         <span className="flight-icon"><LayoutList size={20}/></span>
         <span className="min-w-0 flex-1"><span className="block font-medium">จัดหน้าหลัก</span><span className="block text-[.78rem] text-[var(--muted)]">เรียงลำดับส่วนต่างๆ ตามที่คุณชอบ</span></span>
+        <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
+      </Link>
+    </section>
+
+    <section className="card mt-5 p-2" aria-label="ของทุกคนในทริป">
+      <Link href="/notes" className={row}>
+        <span className="flight-icon"><NotebookPen size={20}/></span>
+        <span className="min-w-0 flex-1"><span className="block font-medium">โน้ต</span><span className="block text-[.78rem] text-[var(--muted)]">จดข้อความและแนบรูป แชร์ให้ทุกคนในทริป</span></span>
         <ChevronRight size={20} className="shrink-0 text-[var(--muted)]"/>
       </Link>
     </section>

@@ -2,6 +2,7 @@
 import { CircleAlert, CircleCheck, TriangleAlert } from "lucide-react";
 import { createElement, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
+import { useViewportLock } from "@/lib/use-viewport-lock";
 import { Field } from "./field";
 
 // The app's own dialogs and toasts. lib/alerts.ts is the only caller: it describes a
@@ -89,31 +90,7 @@ function dismissToast(id: number) {
 function DialogHost() {
   const { dialogs, toasts } = useSyncExternalStore(subscribe, () => state, () => empty);
   const active = dialogs.findLast((d) => !d.closing);
-  const locked = Boolean(active);
-
-  // The page behind stays put while a dialog is up, and the backdrop is sized to the
-  // visual viewport so the iOS keyboard pushes a prompt up instead of covering it.
-  useEffect(() => {
-    if (!locked) return;
-    const root = document.documentElement, viewport = window.visualViewport;
-    const overflow = root.style.overflow;
-    root.style.overflow = "hidden";
-    const sync = () => {
-      if (!viewport) return;
-      root.style.setProperty("--vv-height", `${viewport.height}px`);
-      root.style.setProperty("--vv-top", `${viewport.offsetTop}px`);
-    };
-    sync();
-    viewport?.addEventListener("resize", sync);
-    viewport?.addEventListener("scroll", sync);
-    return () => {
-      root.style.overflow = overflow;
-      root.style.removeProperty("--vv-height");
-      root.style.removeProperty("--vv-top");
-      viewport?.removeEventListener("resize", sync);
-      viewport?.removeEventListener("scroll", sync);
-    };
-  }, [locked]);
+  useViewportLock(Boolean(active));
 
   return <>
     {dialogs.map((entry) => <Dialog key={entry.id} entry={entry} active={entry === active} />)}

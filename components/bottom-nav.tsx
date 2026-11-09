@@ -32,7 +32,7 @@ export function BottomNav({ mapUrl, name, canManage, holding = false }: NavProps
   const pathname = usePathname();
   const router = useRouter();
   const at = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-  const current = pathname === "/" ? 0 : at("/plan") ? 1 : at("/vote") || at("/wheel") ? 3 : at("/settings") || at("/manage") ? 4 : null;
+  const current = pathname === "/" ? 0 : at("/plan") ? 1 : at("/vote") || at("/wheel") ? 3 : at("/settings") || at("/manage") || at("/notes") ? 4 : null;
   const { bar, lens, held, settled, lit, gestures } = useGlassLens(current, (slot) => router.push(PAGES[slot]));
   const tab = (slot: number) => ({ href: PAGES[slot], "data-slot": slot, "data-lit": lit === slot, "aria-current": slot === current ? ("page" as const) : undefined });
   const unread = useUnreadChangelog();

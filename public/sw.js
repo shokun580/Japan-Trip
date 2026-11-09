@@ -29,7 +29,9 @@ self.addEventListener("message", (event) => {
   event.waitUntil(Promise.all(event.data.urls.map((url) => networkFirst(new Request(url, { credentials: "same-origin" }), pageKey(new URL(url, self.location.origin), false)).catch(() => {}))));
 });
 
-const isAsset = (url) => url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/fonts/") || url.pathname.startsWith("/icons/") || /\.(png|svg|ico|woff2)$/.test(url.pathname);
+// A note's photo never changes under its id either, so a ticket opened once is still
+// there on a platform with no signal.
+const isAsset = (url) => url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/fonts/") || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/notes/image/") || /\.(png|svg|ico|woff2)$/.test(url.pathname);
 
 // Next adds a changing _rsc query to its payload requests; the cache key drops it and
 // marks the payload apart from the page's HTML at the same address.
@@ -55,7 +57,8 @@ async function cacheFirst(request) {
   const hit = await cache.match(request);
   if (hit) return hit;
   const response = await fetch(request);
-  if (response.ok) cache.put(request, response.clone());
+  // Not a redirect: without a name, a note's photo comes back as the name picker.
+  if (response.ok && !response.redirected) cache.put(request, response.clone());
   return response;
 }
 
