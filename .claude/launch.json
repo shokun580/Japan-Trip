@@ -4,7 +4,19 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "dev-nvm",
+      "runtimeExecutable": "/Users/aphinansupapol/.nvm/versions/node/v22.19.0/bin/node",
+      "runtimeArgs": [
+        "node_modules/next/dist/bin/next",
+        "dev"
+      ],
       "port": 3000
     }
   ]

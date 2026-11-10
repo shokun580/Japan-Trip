@@ -1,8 +1,8 @@
 "use client";
-import { useTokyoNow } from "@/lib/use-tokyo-now";
+import { useNow } from "@/lib/use-now";
 
 export function CurrentTime({ day, top }: { day: string; top: number }) {
-  const now = useTokyoNow();
+  const now = useNow();
   if (!now || now.date !== day) return null;
   // No z-index on purpose: the cards come later in the DOM, so the line slips behind
   // them instead of striking through their text. Only the gutter part stays visible.

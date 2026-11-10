@@ -3,7 +3,7 @@ import { MapPinned, PlaneLanding, PlaneTakeoff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CurrentTime } from "./current-time";
 import { durationLabel, hasPassed, toMinutes, type TimelineEntry } from "@/lib/timeline";
-import { useTokyoNow } from "@/lib/use-tokyo-now";
+import { useNow } from "@/lib/use-now";
 
 // Interpolate between the bullets either side of "now". Rows grow with their text, so
 // the positions have to come from the real layout — assuming a fixed row height once put
@@ -19,7 +19,7 @@ function indicatorTop(entries: TimelineEntry[], minutes: number, centers: number
 }
 
 export function Timeline({ date, entries }: { date: string; entries: TimelineEntry[] }) {
-  const now = useTokyoNow();
+  const now = useNow();
   const frame = useRef<HTMLElement>(null);
   const [centers, setCenters] = useState<number[]>([]);
 

@@ -6,7 +6,7 @@ import { shiftActivities } from "@/app/actions";
 import { alertError, toastSuccess } from "@/lib/alerts";
 import { dayLabel } from "@/lib/format";
 import { shiftedTimes, toMinutes } from "@/lib/timeline";
-import { useTokyoNow } from "@/lib/use-tokyo-now";
+import { useNow } from "@/lib/use-now";
 import { Field } from "./field";
 import { reach } from "@/lib/reach";
 
@@ -17,7 +17,7 @@ const amountLabel = (minutes: number) => `${minutes > 0 ? "+" : "−"}${Math.abs
 // from there to the end of the day moves together. Negative minutes pull the day
 // forward when the group is ahead of plan.
 export function DayShift({ day, compact = false }: { day: DayData; compact?: boolean }) {
-  const now = useTokyoNow();
+  const now = useNow();
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const [fromId, setFromId] = useState<string | null>(null);

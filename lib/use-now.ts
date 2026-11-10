@@ -1,15 +1,15 @@
 "use client";
 import { useSyncExternalStore } from "react";
-import { readTokyoNow, type TokyoNow } from "./format";
+import { readClock, type ClockNow } from "./format";
 
-let snapshot: TokyoNow | null = null;
+let snapshot: ClockNow | null = null;
 let timer: ReturnType<typeof setInterval> | undefined;
 const listeners = new Set<() => void>();
 
 function subscribe(listener: () => void) {
-  if (listeners.size === 0) snapshot = readTokyoNow();
+  if (listeners.size === 0) snapshot = readClock();
   listeners.add(listener);
-  timer ??= setInterval(() => { snapshot = readTokyoNow(); listeners.forEach((l) => l()); }, 60_000);
+  timer ??= setInterval(() => { snapshot = readClock(); listeners.forEach((l) => l()); }, 60_000);
   return () => {
     listeners.delete(listener);
     if (listeners.size === 0) { clearInterval(timer); timer = undefined; }
@@ -18,9 +18,8 @@ function subscribe(listener: () => void) {
 
 // The server snapshot is null so the first paint matches the server markup; the real
 // clock arrives right after hydration. Every consumer reads one shared snapshot, so
-// the bullets and the "now" line can never disagree about the time.
-export function useTokyoNow() {
+// the bullets and the "now" line can never disagree about the time. It is the phone's
+// own clock (see readClock): Thai time while still in Thailand, Japan's once landed.
+export function useNow() {
   return useSyncExternalStore(subscribe, () => snapshot, () => null);
 }
-
-export const todayTokyo = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());

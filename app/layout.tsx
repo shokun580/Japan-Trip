@@ -7,6 +7,7 @@ import { currentPerson } from "@/lib/session";
 import { themeBootScript, themeStyle } from "@/lib/themes";
 import { getSavedTheme } from "@/lib/preferences";
 import { ThemeSync } from "@/components/theme-sync";
+import { ZoneSync } from "@/components/zone-sync";
 
 // appleWebApp makes a home-screen copy open full screen on iOS, under the short name
 // that fits beneath the icon. The rest of the install comes from app/manifest.ts.
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <StartAtTop />
       <ScrollGuard />
       {person && <ThemeSync person={person} saved={Boolean(theme)} />}
+      <ZoneSync />
       <Offline />
       {children}
     </body>

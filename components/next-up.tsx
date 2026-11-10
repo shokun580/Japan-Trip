@@ -4,7 +4,7 @@ import { ChevronRight, Compass, MapPinned } from "lucide-react";
 import type { TripData } from "@/lib/types";
 import { dayLabel } from "@/lib/format";
 import { dayEntries, toMinutes, type TimelineEntry } from "@/lib/timeline";
-import { useTokyoNow } from "@/lib/use-tokyo-now";
+import { useNow } from "@/lib/use-now";
 
 const untilLabel = (minutes: number) => {
   if (minutes < 1) return "ตอนนี้";
@@ -32,7 +32,7 @@ function Upcoming({ label, entries }: { label: string; entries: TimelineEntry[] 
 // trip it counts the days down over the first day's plan; after it, it says goodbye.
 // It keeps its own height — the converter below takes whatever room is left.
 export function NextUp({ trip }: { trip: TripData }) {
-  const now = useTokyoNow();
+  const now = useNow();
 
   // Null before hydration: the card holds its shape so nothing jumps.
   if (!now) return <section className="card hero p-4 sm:p-5" aria-busy="true"><p className="eyebrow">ถัดไป</p><div className="skeleton-line mt-3 h-9 w-40"/><div className="skeleton-line mt-2 h-4 w-32"/><div className="skeleton-line mt-6 h-4 w-48"/><div className="skeleton-line mt-2 h-4 w-40"/></section>;

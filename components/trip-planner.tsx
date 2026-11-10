@@ -9,13 +9,14 @@ import { BottomNav } from "./bottom-nav"; import { Timeline } from "./timeline";
 import { DayShift } from "./day-shift";
 import { WeatherLine } from "./weather";
 import { dayEntries } from "@/lib/timeline";
-import { todayTokyo } from "@/lib/use-tokyo-now";
 
-// The whole trip, one day at a time. Opens on the day asked for, else today.
-export function TripPlanner({ trip, person, stay, forecast, initialDayId }: { trip: TripData; person: PersonKey; stay: StayData | null; forecast: ForecastByDate; initialDayId: string | null }) {
+// The whole trip, one day at a time. Opens on the day asked for, else today. `today`
+// comes from the server (the phone's own date, see deviceToday) so the first render
+// here and on the server agree on which day that is.
+export function TripPlanner({ trip, person, stay, forecast, initialDayId, today }: { trip: TripData; person: PersonKey; stay: StayData | null; forecast: ForecastByDate; initialDayId: string | null; today: string }) {
   const asked = trip.days.findIndex((d) => d.id === initialDayId);
-  const today = trip.days.findIndex((d) => d.date === todayTokyo());
-  const [index, setIndex] = useState(Math.max(0, asked >= 0 ? asked : today));
+  const todayIndex = trip.days.findIndex((d) => d.date === today);
+  const [index, setIndex] = useState(Math.max(0, asked >= 0 ? asked : todayIndex));
   // Which way the last day change went, so the new day slides in from that side.
   // null on first render: the page entrance already covers that.
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
